@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uvod u računarstvo</title>
+    <link rel="stylesheet" href="../css/convert.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../js/convert.js" defer></script>
+</head>
+<body>
+    <div class="container-fluid p-4 bg-primary text-white text-center">
+        <h1>Uvod u Računarstvo</h1>
+        <h5>Pretvaranje brojeva između različitih brojnih sistema</h2>
+    </div>
+    <div class="container mt-5">
+        <div class="row">
+            <h4 class="text-center p-4">Prevođenje brojeva iz brojnog sistema sa proizvoljnom osnovom u brojni sistem osnove 10</h4>
+            <div class="input-group mb-3">
+                <input class="form-control" type="text" id="base1" placeholder="Osnova">
+                <input class="form-control" type="text" id="num1" placeholder="Broj u sistemu unete osnove">
+                <button class="btn btn-success px-3" id="convert1">Pretvori</button>
+            </div>
+            <p id="res1" class="my-4 text-center"></p>
+        </div>
+        <div class="row">
+            <h4 class="text-center p-4">Prevođenje brojeva iz dekadnog brojnog sistema u pozicioni brojni sistem sa proizvoljnom osnovom</h4>
+            <div class="input-group">
+                <input class="form-control" type="text" id="base2" placeholder="Osnova">
+                <input class="form-control" type="text" id="prec2" placeholder="Preciznost decimala">
+            </div>
+            <div class="input-group mb-3">
+                <input class="form-control" type="text" id="num2" placeholder="Dekadni broj">
+                <button class="btn btn-success px-3" id="convert2">Pretvori</button>
+            </div>
+            <div id="res2" class="my-4 text-center"></div>
+        </div>
+        <div class="row">
+            <h4 class="text-center p-4">Prevođenje brojeva iz binarnog brojnog sistema u brojni sistem čija je osnova stepen dvojke</h4>
+            <div class="input-group mb-3">
+                <input class="form-control" type="text" id="num3" placeholder="Binarni broj">
+                <select id="base3" class="form-select">
+                    <option value="-1" selected disabled hidden>Osnova</option>
+                    <option value="2">4</option>
+                    <option value="3">8</option>
+                    <option value="4">16</option>
+                    <option value="5">32</option>
+                </select>
+                <button class="btn btn-success px-3" id="convert3">Pretvori</button>
+            </div>
+            <p id="res3" class="my-4 text-center"></p>
+        </div>
+        <div class="row">
+            <h4 class="text-center p-4">Prevođenje brojeva iz sistema čija je osnova stepen dvojke u binarni brojni sistem</h4>
+            <div class="input-group mb-3">
+                <input class="form-control" type="text" id="num4" placeholder="Broj">
+                <select id="base4" class="form-select">
+                    <option value="-1" selected disabled hidden>Osnova</option>
+                    <option value="2">4</option>
+                    <option value="3">8</option>
+                    <option value="4">16</option>
+                    <option value="5">32</option>
+                </select>
+                <button class="btn btn-success px-3" id="convert4">Pretvori</button>
+            </div>
+            <p id="res4" class="my-4 text-center"></p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uvod u računarstvo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../js/functions.js" defer></script>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+    <script src="http://dreasgrech.com/upload/jslatex/jquery.jslatex.packed.js"></script>
+</head>
+<body>
+    <div class="container-fluid p-4 bg-primary text-white text-center">
+        <h1>Uvod u Računarstvo</h1>
+        <h5>Analiza prekidačkih funkcija</h2>
+    </div>
+    <div class="container mt-5">
+        <div class="row d-none main-q">
+            <h4 class="text-center p-4">U kom formatu je funkcija data:</h4>
+            <div class="input-group mb-3">
+                <label class="form-check-label">
+                    <input type="radio" class="form-check-input me-2" id="rb-func" name="format" checked>U vidu funkcije (PDNF, PKNF, DNF, PPNF, KP, ...)
+                </label>
+                <label class="form-check-label mx-3">
+                    <input type="radio" class="form-check-input me-2" id="rb-table" name="format">U vidu tablice
+                </label>
+                <label class="form-check-label mx-3">
+                    <input type="radio" class="form-check-input me-2" id="rb-dec" name="format" disabled>U vidu decimalnog indeksa
+                </label>
+                <label class="form-check-label mx-3">
+                    <input type="radio" class="form-check-input me-2" id="rb-decs" name="format" disabled>U vidu skupa decimalnih indeksa
+                </label>
+                <label class="form-check-label mx-3">
+                    <input type="radio" class="form-check-input me-2" id="rb-vec" name="format" disabled>U vidu vektora
+                </label>
+            </div>
+            <div class="input-group mb-3 text-center">
+                <button class="btn btn-success px-3 m-auto" id="next1">Dalje</button>
+            </div>
+        </div>
+        <div class="row  func-q">
+            <h4 class="text-center p-4">Unesi funkciju</h4>
+            <p><strong>*</strong> se koristi za operaciju puta, <strong>+</strong> za operaciju plus, <strong>!</strong> za komplement (piše se ispred broja) i <strong>^</strong> za okruženi plus (XOR) (npr. x1*!x2+x3, x1^x2*x3)</p>
+            <p>Za promenljive koristiti x pa broj, pri čemu broj treba da ide od 1 do 9, u suprotnom neće raditi</p>
+            <div class="input-group mb-3">
+                <input class="form-control" type="text" id="func" placeholder="Funkcija">
+            </div>
+            <div class="input-group mb-3 text-center">
+                <button class="btn btn-success px-3 m-auto" id="next2">Analiziraj</button>
+            </div>
+        </div>
+        <div class="row d-none table-q">
+            <h4 class="text-center p-4">Unesi tablicu</h4>
+            <h5 class="text-center p-4">Unesi broj promenljivih</h5>
+            <div class="input-group mb-3">
+                <input class="form-control" type="text" id="vars" placeholder="Broj promenljivih">
+                <button class="btn btn-success px-3 m-auto" id="next3">Kreiraj tablicu</button>
+            </div>
+            <h5 class="text-center p-4">Popuni tablicu</h5>
+            <!-- <table class="table table-bordered">
+                <tr>
+                    <th>x1</th>
+                    <th>x1</th>
+                    <th>x1</th>
+                    <th>f</th>
+                </tr>
+                <tr>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td class="col-sm-3">
+                        <input class="form-control" type="text" id="func" placeholder="f">
+                    </td>
+                </tr>
+            </table> -->
+            <div class="input-group mb-3 text-center">
+                <button class="btn btn-success px-3 m-auto" id="next3" disabled>Analiziraj</button>
+            </div>
+        </div>
+        <div class="row res-q">
+            
+        </div>
+    </div>
+</body>
+</html>
