@@ -283,7 +283,7 @@ document.getElementById('convert4').onclick = () => {
         return;
     }
 
-    if(!/^[0-9]+(\.[0-9]+)?$/.test(num)) {
+    if(!/^[0-9A-V]+(\.[0-9A-V]+)?$/.test(num)) {
         Swal.fire({
             icon: 'error',
             title: 'Greška',

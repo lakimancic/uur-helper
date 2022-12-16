@@ -5,6 +5,12 @@ document.getElementById('next1').onclick = () => {
         document.querySelector('.func-q').classList.toggle('d-none');
     } else if(document.getElementById('rb-table').checked) {
         document.querySelector('.table-q').classList.toggle('d-none');
+    } else if(document.getElementById('rb-dec').checked) {
+        document.querySelector('.numd-q').classList.toggle('d-none');
+    } else if(document.getElementById('rb-decs').checked) {
+        document.querySelector('.decs-q').classList.toggle('d-none');
+    } else if(document.getElementById('rb-vec').checked) {
+        document.querySelector('.vec-q').classList.toggle('d-none');
     }
 };
 
@@ -21,7 +27,7 @@ const solve = () => {
     table.classList.add('table');
     table.classList.add('table-bordered')
     const thr = document.createElement('tr');
-    vars.reverse();
+    // vars.reverse();
     vars.forEach(i => {
         const th = document.createElement('th');
         th.innerText = i;
@@ -110,11 +116,11 @@ const solve = () => {
     let kpText = 'f(' + vars.map(i => i[0] + '_' + i[1]).join(',') + ') = ';
     let vars2 = [];
     truthTable.filter(i => i[i.length - 1] == 1).forEach(i => {
-        let truevars = vars.filter((j, jnd) => i[jnd]);
+        let truevars = vars.map(i => i[0] + '_' + i[1]).filter((j, jnd) => i[jnd]);
         let vars3 = [truevars];
         vars.forEach((j, jnd) => {
             if(!i[jnd]) {
-                vars3 = vars3.concat(vars3.map(k => [...k, j]));
+                vars3 = vars3.concat(vars3.map(k => [...k, j[0] + '_' + j[1]]));
             }
         });
         vars3.forEach(j => {
@@ -129,7 +135,10 @@ const solve = () => {
     vars2.forEach(i => {
         if(!vars3.includes(i)) vars3.push(i);
     })
-    kpText += vars3.join('\\oplus ');
+    kpText += vars3.sort((a,b) => {
+        if(a.length != b.length) return a.length - b.length;
+        return a.localeCompare(b);
+    }).join('\\oplus ');
     kp.text(kpText);
     document.querySelector('.res-q').appendChild(kp[0]);
     kp.latex();
@@ -143,7 +152,7 @@ const getTruthTable = () => {
     vars = [];
     for(let i=10;i>=1;i--) {
         if(func.includes(`x${i}`) || found) {
-            vars.push(`x${i}`);
+            vars.unshift(`x${i}`);
             found = true;
         }
     };
@@ -156,7 +165,7 @@ const getTruthTable = () => {
         }
         let str = func.replaceAll('*', '&').replaceAll('+', '|');
         for(let j=0;j<vars.length;j++) {
-            str = str.replaceAll(vars[j], pomArr[vars.length - 1 - j]);
+            str = str.replaceAll(vars[j], pomArr[j]);
         }
         pomArr.push(eval(str));
         truthTable.push(pomArr);
@@ -164,4 +173,119 @@ const getTruthTable = () => {
     solve();
 };
 
+const createTable = () => {
+    const varNum = document.getElementById('vars').value;
+    truthTable = [];
+    vars = [];
+
+    const table = $(`<table class="table table-bordered tablica">`)[0];
+    let tr = $("<tr></tr>")[0];
+
+    for(let i=0;i<varNum;i++) {
+        tr.appendChild($(`<th>x${i+1}</th>`)[0]);
+        vars.push(`x${i+1}`);
+    }
+    tr.appendChild($(`<th>f</th>`)[0]);
+
+    table.appendChild(tr);
+
+    for(let i=0;i<Math.pow(2, vars.length);i++) {
+        let tr2 = $("<tr></tr>")[0];
+        const pomArr = [];
+        let temp = i;
+        for(let j=0;j<vars.length;j++) {
+            pomArr.unshift(temp % 2);
+            temp = Math.floor(temp / 2);
+        }
+        truthTable.push(pomArr);
+        pomArr.forEach(i => tr2.appendChild($(`<td>${i}</td>`)[0]));
+        tr2.appendChild($(`<td class="col-sm-3"><input class="form-control" type="text" placeholder="f"></td>`)[0])
+        table.appendChild(tr2);
+    }
+
+    document.getElementById('next3').disabled = false;
+
+    $(".popuni").after(table);
+};
+
+const getTruthTable2 = () => {
+    let table = $(".tablica")[0];
+    table.querySelectorAll("input").forEach((i, ind) => {
+        truthTable[ind].push(i.value);
+    });
+    solve();
+};
+
+const getTruthTable3 = () => {
+    let numd = document.getElementById("numd").value;
+    const varNum = Math.ceil(Math.log2(Math.log2(numd)));
+    truthTable = [];
+    vars = [];
+    for(let i=0;i<varNum;i++) {
+        vars.push(`x${i+1}`);
+    }
+    for(let i=0;i<Math.pow(2, vars.length);i++) {
+        const pomArr = [];
+        let temp = i;
+        for(let j=0;j<vars.length;j++) {
+            pomArr.unshift(temp % 2);
+            temp = Math.floor(temp / 2);
+        }
+        pomArr.push(numd % 2);
+        numd = Math.floor(numd / 2);
+        truthTable.push(pomArr);
+    }
+    solve();
+};
+
+const getTruthTable4 = () => {
+    let f0 = document.getElementById("f_0").value.split(',').map(i => parseInt(i));
+    let f1 = document.getElementById("f_1").value.split(',').map(i => parseInt(i));
+    const numd = f0.length + f1.length;
+    const varNum = Math.ceil(Math.log2(numd));
+    truthTable = [];
+    vars = [];
+    for(let i=0;i<varNum;i++) {
+        vars.push(`x${i+1}`);
+    }
+    for(let i=0;i<Math.pow(2, vars.length);i++) {
+        const pomArr = [];
+        let temp = i;
+        for(let j=0;j<vars.length;j++) {
+            pomArr.unshift(temp % 2);
+            temp = Math.floor(temp / 2);
+        }
+        truthTable.push(pomArr);
+    }
+    f0.forEach(i => truthTable[i].push(0));
+    f1.forEach(i => truthTable[i].push(1));
+    solve();
+};
+
+const getTruthTable5 = () => {
+    let vec = document.getElementById("vec").value;
+    const varNum = Math.ceil(Math.log2(vec.length));
+    truthTable = [];
+    vars = [];
+    for(let i=0;i<varNum;i++) {
+        vars.push(`x${i+1}`);
+    }
+    for(let i=0;i<Math.pow(2, vars.length);i++) {
+        const pomArr = [];
+        let temp = i;
+        for(let j=0;j<vars.length;j++) {
+            pomArr.unshift(temp % 2);
+            temp = Math.floor(temp / 2);
+        }
+        pomArr.push(vec[i]);
+        truthTable.push(pomArr);
+    }
+    solve();
+};
+
 document.getElementById('next2').onclick = getTruthTable;
+document.getElementById('next3').onclick = getTruthTable2;
+document.getElementById('next4').onclick = getTruthTable3;
+document.getElementById('next5').onclick = getTruthTable4;
+document.getElementById('next6').onclick = getTruthTable5;
+document.getElementById('create').onclick = createTable;
