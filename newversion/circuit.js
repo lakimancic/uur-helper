@@ -217,6 +217,130 @@ const createCanvasDNF2 = (mdnf, vars) => {
     });
 };
 
+const createCanvasDNF3 = (mdnf, vars) => {
+    const canvasCon = createElem('div', '', 'canvas-con m-auto');
+    /** @type {HTMLCanvasElement} */
+    const canvas = createElem('canvas', '', '');
+    canvasCon.appendChild(canvas);
+    document.querySelector('.res-q').appendChild(canvasCon);
+
+    canvas.height = TEXT_PAD + NOT_TOP + GATE_SIZE + COMP_GAP + mdnf.map(i => {
+        let sizeH = WIRE_GAP * 3 * (i.length - 1);
+        return sizeH + COMP_GAP
+    }).reduce((a,b) => a + b, 0) + COMP_GAP / 2;
+    canvas.width = WIRE_GAP2 + vars.map((vi) => {
+        if(mdnf.filter(i => i.filter(j => j.name == vi && j.comp).length > 0).length > 0) return WIRE_GAP2 * 3;
+        return WIRE_GAP2 * 1.5;
+    }).reduce((a,b) => a + b, 0) + COMP_GAP + GATE_SIZE * ( 2 * Math.max(...mdnf.map(i => Math.ceil(Math.log2(i.length)))) - 1) + COMP_GAP * 2 + GATE_SIZE * ( 2 * Math.ceil(Math.log2(mdnf.length)) - 1) + GATE_SIZE * 3 / 2;
+
+    const ctx = canvas.getContext('2d');
+    ctx.webkitImageSmoothingEnabled = false;
+    ctx.mozImageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = false;
+
+    // Lines
+    let ptx = WIRE_GAP2;
+    let newVars = [];
+    vars.forEach((vi) => {
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(ptx, TEXT_PAD);
+        ctx.lineTo(ptx, canvas.height);
+        const vart = createElem('p', `\\[${mapVar(vi)}\\]`, '');
+        vart.style.top = `${-NOT_TOP / 3}px`;
+        vart.style.left = `${ptx + 5}px`;
+        canvasCon.appendChild(vart);
+        newVars.push(vi);
+        if(mdnf.filter(i => i.filter(j => j.name == vi && j.comp).length > 0).length > 0) {
+            ctx.moveTo(ptx, TEXT_PAD + 30);
+            ptx += WIRE_GAP2 * 1.5;
+            ctx.lineTo(ptx, TEXT_PAD + NOT_TOP / 2);
+            ctx.lineTo(ptx, canvas.height);
+            newVars.push('!' + vi);
+            ctx.stroke();
+            drawNotGate(ctx, ptx, TEXT_PAD + NOT_TOP);
+        } else {
+            ctx.stroke();
+        }
+        ptx += WIRE_GAP2 * 1.5;
+    });
+
+    let pty = TEXT_PAD + NOT_TOP + GATE_SIZE + COMP_GAP;
+    ptx += COMP_GAP;
+
+    const getAndRec1 = (dnf) => {
+        if(dnf.length > 1) {
+            let mid = Math.floor(dnf.length / 2);
+            let pos1 = getAndRec1(dnf.slice(0, mid)); 
+            let pos2 = getAndRec1(dnf.slice(mid));
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(pos1.x, pos1.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, pos1.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, (pos1.y + pos2.y) / 2 - WIRE_GAP * 3 / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP, (pos1.y + pos2.y) / 2 - WIRE_GAP * 3 / 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(pos2.x, pos2.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, pos2.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, (pos1.y + pos2.y) / 2 + WIRE_GAP * 3 / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP, (pos1.y + pos2.y) / 2 + WIRE_GAP * 3 / 2);
+            ctx.stroke();
+            drawAndGate2(ctx, Math.max(pos1.x, pos2.x) + COMP_GAP + GATE_SIZE / 2, (pos1.y + pos2.y) / 2);
+            return { x: Math.max(pos1.x, pos2.x) + (COMP_GAP + GATE_SIZE), y: (pos1.y + pos2.y) / 2 };
+        }
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(ptx - GATE_SIZE / 8, pty);
+        ctx.lineTo(ptx, pty);
+        ctx.stroke();
+        let vname = (dnf[0].comp ? '!':'') + dnf[0].name;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(WIRE_GAP2 + WIRE_GAP2 * 1.5 * newVars.indexOf(vname), pty );
+        ctx.lineTo(ptx - GATE_SIZE / 8, pty );
+        ctx.stroke();
+        pty += WIRE_GAP * 3;
+        return { x: ptx, y: pty - WIRE_GAP * 3 };
+    }
+
+    const getOrRec1 = (dnf) => {
+        if(dnf.length > 1) {
+            let mid = Math.floor(dnf.length / 2);
+            let pos1 = getOrRec1(dnf.slice(0, mid)); 
+            let pos2 = getOrRec1(dnf.slice(mid));
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(pos1.x, pos1.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, pos1.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, (pos1.y + pos2.y) / 2 - WIRE_GAP * 3 / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP, (pos1.y + pos2.y) / 2 - WIRE_GAP * 3 / 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(pos2.x, pos2.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, pos2.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, (pos1.y + pos2.y) / 2 + WIRE_GAP * 3 / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP, (pos1.y + pos2.y) / 2 + WIRE_GAP * 3 / 2);
+            ctx.stroke();
+            drawOrGate2(ctx, Math.max(pos1.x, pos2.x) + COMP_GAP + GATE_SIZE / 2, (pos1.y + pos2.y) / 2);
+            return { x: Math.max(pos1.x, pos2.x) + (COMP_GAP + GATE_SIZE), y: (pos1.y + pos2.y) / 2 };
+        }
+        return getAndRec1(dnf[0]);
+    };
+
+    let pos = getOrRec1(mdnf);
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+    ctx.lineTo(pos.x + GATE_SIZE * 1.5, pos.y);
+    ctx.stroke();
+
+    const rest = createElem('p', `\\[f\\]`, '');
+    rest.style.top = `${pos.y - NOT_TOP + 5}px`;
+    rest.style.left = `${pos.x + GATE_SIZE * 3 / 2}px`;
+    canvasCon.appendChild(rest);
+};
+
 const createCanvasKNF = (mknf, vars) => {
     const canvasCon = createElem('div', '', 'canvas-con m-auto');
     /** @type {HTMLCanvasElement} */
@@ -427,6 +551,130 @@ const createCanvasKNF2 = (mdnf, vars) => {
         ctx.stroke();
         pty += sizeH + COMP_GAP;
     });
+};
+
+const createCanvasKNF3 = (mdnf, vars) => {
+    const canvasCon = createElem('div', '', 'canvas-con m-auto');
+    /** @type {HTMLCanvasElement} */
+    const canvas = createElem('canvas', '', '');
+    canvasCon.appendChild(canvas);
+    document.querySelector('.res-q').appendChild(canvasCon);
+
+    canvas.height = TEXT_PAD + NOT_TOP + GATE_SIZE + COMP_GAP + mdnf.map(i => {
+        let sizeH = WIRE_GAP * 3 * (i.length - 1);
+        return sizeH + COMP_GAP
+    }).reduce((a,b) => a + b, 0) + COMP_GAP / 2;
+    canvas.width = WIRE_GAP2 + vars.map((vi) => {
+        if(mdnf.filter(i => i.filter(j => j.name == vi && j.comp).length > 0).length > 0) return WIRE_GAP2 * 3;
+        return WIRE_GAP2 * 1.5;
+    }).reduce((a,b) => a + b, 0) + COMP_GAP + GATE_SIZE * ( 2 * Math.max(...mdnf.map(i => Math.ceil(Math.log2(i.length)))) - 1) + COMP_GAP * 2 + GATE_SIZE * ( 2 * Math.ceil(Math.log2(mdnf.length)) - 1) + GATE_SIZE * 3 / 2;
+
+    const ctx = canvas.getContext('2d');
+    ctx.webkitImageSmoothingEnabled = false;
+    ctx.mozImageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = false;
+
+    // Lines
+    let ptx = WIRE_GAP2;
+    let newVars = [];
+    vars.forEach((vi) => {
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(ptx, TEXT_PAD);
+        ctx.lineTo(ptx, canvas.height);
+        const vart = createElem('p', `\\[${mapVar(vi)}\\]`, '');
+        vart.style.top = `${-NOT_TOP / 3}px`;
+        vart.style.left = `${ptx + 5}px`;
+        canvasCon.appendChild(vart);
+        newVars.push(vi);
+        if(mdnf.filter(i => i.filter(j => j.name == vi && j.comp).length > 0).length > 0) {
+            ctx.moveTo(ptx, TEXT_PAD + 30);
+            ptx += WIRE_GAP2 * 1.5;
+            ctx.lineTo(ptx, TEXT_PAD + NOT_TOP / 2);
+            ctx.lineTo(ptx, canvas.height);
+            newVars.push('!' + vi);
+            ctx.stroke();
+            drawNotGate(ctx, ptx, TEXT_PAD + NOT_TOP);
+        } else {
+            ctx.stroke();
+        }
+        ptx += WIRE_GAP2 * 1.5;
+    });
+
+    let pty = TEXT_PAD + NOT_TOP + GATE_SIZE + COMP_GAP;
+    ptx += COMP_GAP;
+
+    const getAndRec1 = (dnf) => {
+        if(dnf.length > 1) {
+            let mid = Math.floor(dnf.length / 2);
+            let pos1 = getAndRec1(dnf.slice(0, mid)); 
+            let pos2 = getAndRec1(dnf.slice(mid));
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(pos1.x, pos1.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, pos1.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, (pos1.y + pos2.y) / 2 - WIRE_GAP * 3 / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP, (pos1.y + pos2.y) / 2 - WIRE_GAP * 3 / 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(pos2.x, pos2.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, pos2.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, (pos1.y + pos2.y) / 2 + WIRE_GAP * 3 / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP, (pos1.y + pos2.y) / 2 + WIRE_GAP * 3 / 2);
+            ctx.stroke();
+            drawOrGate2(ctx, Math.max(pos1.x, pos2.x) + COMP_GAP + GATE_SIZE / 2, (pos1.y + pos2.y) / 2);
+            return { x: Math.max(pos1.x, pos2.x) + (COMP_GAP + GATE_SIZE), y: (pos1.y + pos2.y) / 2 };
+        }
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(ptx - GATE_SIZE / 8, pty);
+        ctx.lineTo(ptx, pty);
+        ctx.stroke();
+        let vname = (dnf[0].comp ? '!':'') + dnf[0].name;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(WIRE_GAP2 + WIRE_GAP2 * 1.5 * newVars.indexOf(vname), pty );
+        ctx.lineTo(ptx - GATE_SIZE / 8, pty );
+        ctx.stroke();
+        pty += WIRE_GAP * 3;
+        return { x: ptx, y: pty - WIRE_GAP * 3 };
+    }
+
+    const getOrRec1 = (dnf) => {
+        if(dnf.length > 1) {
+            let mid = Math.floor(dnf.length / 2);
+            let pos1 = getOrRec1(dnf.slice(0, mid)); 
+            let pos2 = getOrRec1(dnf.slice(mid));
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(pos1.x, pos1.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, pos1.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, (pos1.y + pos2.y) / 2 - WIRE_GAP * 3 / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP, (pos1.y + pos2.y) / 2 - WIRE_GAP * 3 / 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(pos2.x, pos2.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, pos2.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, (pos1.y + pos2.y) / 2 + WIRE_GAP * 3 / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP, (pos1.y + pos2.y) / 2 + WIRE_GAP * 3 / 2);
+            ctx.stroke();
+            drawAndGate2(ctx, Math.max(pos1.x, pos2.x) + COMP_GAP + GATE_SIZE / 2, (pos1.y + pos2.y) / 2);
+            return { x: Math.max(pos1.x, pos2.x) + (COMP_GAP + GATE_SIZE), y: (pos1.y + pos2.y) / 2 };
+        }
+        return getAndRec1(dnf[0]);
+    };
+
+    let pos = getOrRec1(mdnf);
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+    ctx.lineTo(pos.x + GATE_SIZE * 1.5, pos.y);
+    ctx.stroke();
+
+    const rest = createElem('p', `\\[f\\]`, '');
+    rest.style.top = `${pos.y - NOT_TOP + 5}px`;
+    rest.style.left = `${pos.x + GATE_SIZE * 3 / 2}px`;
+    canvasCon.appendChild(rest);
 };
 
 const createCanvasNAND = (gdnf, vars) => {
@@ -955,7 +1203,7 @@ const createCanvasNOR = (gknf, vars) => {
 
 const createCanvasNOR2 = (gdnf, vars) => {
     if(gdnf.length == 1) {
-        createCanvasNAND(gdnf, vars);
+        createCanvasNOR(gdnf, vars);
         return;
     }
     const canvasCon = createElem('div', '', 'canvas-con m-auto');
@@ -1206,6 +1454,244 @@ const createCanvasNOR2 = (gdnf, vars) => {
     const rest = createElem('p', `\\[f\\]`, '');
     rest.style.top = `${(pos1.y + pos2.y) / 2 - NOT_TOP + 5}px`;
     rest.style.left = `${Math.max(pos1.x, pos2.x) + COMP_GAP + GATE_SIZE + GATE_SIZE * 3 / 2}px`;
+    canvasCon.appendChild(rest);
+};
+
+const createCanvasNOR3 = (gdnf, vars) => {
+    const canvasCon = createElem('div', '', 'canvas-con m-auto');
+    /** @type {HTMLCanvasElement} */
+    const canvas = createElem('canvas', '', '');
+    canvasCon.appendChild(canvas);
+    document.querySelector('.res-q').appendChild(canvasCon);
+
+    let mdnf = gdnf.map(i => {
+        if(i.length == 1) return i;
+        return i.map(j => {
+            return { name: j.name, comp: !j.comp };
+        });
+    });
+
+    const getSizeRec2 = (dnf) => {
+        if(dnf.length > 1) {
+            let mid = Math.floor(dnf.length / 2);
+            let s1 = getSizeRec2(dnf.slice(0, mid)); 
+            let s2 = getSizeRec2(dnf.slice(mid));
+            return Math.max(s1, s2) + (COMP_GAP + GATE_SIZE * 6 / 5) * 2;
+        }
+        return COMP_GAP;
+    };
+
+    const getSizeRec1 = (dnf) => {
+        if(dnf.length > 1) {
+            let mid = Math.floor(dnf.length / 2);
+            let s1 = getSizeRec1(dnf.slice(0, mid)); 
+            let s2 = getSizeRec1(dnf.slice(mid));
+            return Math.max(s1, s2) + (COMP_GAP + GATE_SIZE * 6 / 5) * 2;
+        }
+        let mid = Math.floor(dnf[0].length / 2);
+        if(dnf[0].length == 1) {
+            return COMP_GAP;
+        }
+        let s1 = getSizeRec2(dnf[0].slice(0, mid)); 
+        let s2 = getSizeRec2(dnf[0].slice(mid));
+        return Math.max(s1, s2) + (COMP_GAP + GATE_SIZE * 6 / 5);
+    };
+
+    canvas.height = TEXT_PAD + NOT_TOP * 1.2 + GATE_SIZE + COMP_GAP + mdnf.map(i => {
+        return i.length
+    }).reduce((a,b) => a + b, 0) * WIRE_GAP * 3;
+    canvas.width = WIRE_GAP2 + vars.map((vi) => {
+        if(mdnf.filter(i => i.filter(j => j.name == vi && j.comp).length > 0).length > 0) return WIRE_GAP2 * 4;
+        return WIRE_GAP2 * 2;
+    }).reduce((a,b) => a + b, 0) + getSizeRec1(mdnf) + (COMP_GAP + GATE_SIZE * 6 / 5);
+
+    const ctx = canvas.getContext('2d');
+    ctx.webkitImageSmoothingEnabled = false;
+    ctx.mozImageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = false;
+
+    // Lines
+    let ptx = WIRE_GAP2;
+    let newVars = [];
+    vars.forEach((vi) => {
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(ptx, TEXT_PAD);
+        ctx.lineTo(ptx, canvas.height);
+        const vart = createElem('p', `\\[${mapVar(vi)}\\]`, '');
+        vart.style.top = `${-NOT_TOP / 3}px`;
+        vart.style.left = `${ptx + 5}px`;
+        canvasCon.appendChild(vart);
+        newVars.push(vi);
+        if(mdnf.filter(i => i.filter(j => j.name == vi && j.comp).length > 0).length > 0) {
+            ctx.moveTo(ptx, TEXT_PAD + 30);
+            ptx += WIRE_GAP2 * 2;
+            ctx.lineTo(ptx, TEXT_PAD + NOT_TOP / 2);
+            ctx.lineTo(ptx, TEXT_PAD + NOT_TOP * 0.7);
+            ctx.lineTo(ptx + GATE_SIZE / 4, TEXT_PAD + NOT_TOP * 0.7);
+            ctx.lineTo(ptx + GATE_SIZE / 4, TEXT_PAD + NOT_TOP * 1.3);
+            newVars.push('!' + vi);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(ptx, TEXT_PAD + NOT_TOP * 0.7);
+            ctx.lineTo(ptx - GATE_SIZE / 4, TEXT_PAD + NOT_TOP * 0.7);
+            ctx.lineTo(ptx - GATE_SIZE / 4, TEXT_PAD + NOT_TOP * 1.3);
+            ctx.stroke();
+            drawNotNor(ctx, ptx, TEXT_PAD + NOT_TOP * 1.2);
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(ptx, TEXT_PAD + NOT_TOP * 1.2 + GATE_SIZE / 2 + GATE_SIZE / 5);
+            ctx.lineTo(ptx, canvas.height);
+            ctx.stroke();
+        } else {
+            ctx.stroke();
+        }
+        ptx += WIRE_GAP2 * 2;
+    });
+    console.log(newVars);
+
+    let ttx = ptx;
+    let pty = TEXT_PAD + NOT_TOP + GATE_SIZE + COMP_GAP;
+
+    const getNorRecs4 = (dnf) => {
+        if(dnf.length > 1) {
+            let mid = Math.floor(dnf.length / 2);
+            // return `\\overline{\\overline{${getNorRec4(dnf.slice(0, mid))} + ${getNorRec4(dnf.slice(mid))}}}`;
+            let pos1 = getNorRecs4(dnf.slice(0, mid)); 
+            let pos2 = getNorRecs4(dnf.slice(mid));
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(pos1.x, pos1.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, pos1.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, (pos1.y + pos2.y) / 2 - WIRE_GAP * 3 / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP, (pos1.y + pos2.y) / 2 - WIRE_GAP * 3 / 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(pos2.x, pos2.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, pos2.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, (pos1.y + pos2.y) / 2 + WIRE_GAP * 3 / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP, (pos1.y + pos2.y) / 2 + WIRE_GAP * 3 / 2);
+            ctx.stroke();
+            drawNorGate2(ctx, Math.max(pos1.x, pos2.x) + COMP_GAP + GATE_SIZE / 2, (pos1.y + pos2.y) / 2);
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(Math.max(pos1.x, pos2.x) + COMP_GAP + GATE_SIZE * 6 / 5, (pos1.y + pos2.y) / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP * 3 / 2 + GATE_SIZE * 6 / 5, (pos1.y + pos2.y) / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP * 3 / 2 + GATE_SIZE * 6 / 5, (pos1.y + pos2.y) / 2 - WIRE_GAP * 3 / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP * 2 + GATE_SIZE * 6 / 5, (pos1.y + pos2.y) / 2 - WIRE_GAP * 3 / 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(Math.max(pos1.x, pos2.x) + COMP_GAP * 3 / 2 + GATE_SIZE * 6 / 5, (pos1.y + pos2.y) / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP * 3 / 2 + GATE_SIZE * 6 / 5, (pos1.y + pos2.y) / 2 + WIRE_GAP * 3 / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP * 2 + GATE_SIZE * 6 / 5, (pos1.y + pos2.y) / 2 + WIRE_GAP * 3 / 2);
+            ctx.stroke();
+            drawNorGate2(ctx, Math.max(pos1.x, pos2.x) + COMP_GAP * 2 + GATE_SIZE * 6 / 5 + GATE_SIZE / 2, (pos1.y + pos2.y) / 2);
+            return { x: Math.max(pos1.x, pos2.x) + (COMP_GAP + GATE_SIZE * 6 / 5) * 2, y: (pos1.y + pos2.y) / 2 };
+        } else {
+            // if(dnf[0].comp) return mapVar(dnf[0].name);
+            // else return `\\overline{${mapVar(dnf[0].name)}}`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(ptx - GATE_SIZE / 8, pty);
+            ctx.lineTo(ptx, pty);
+            ctx.stroke();
+            console.log(dnf);
+            let vname = (dnf[0].comp ? '!':'') + dnf[0].name;
+            console.log(vname);
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(WIRE_GAP2 + WIRE_GAP2 * 2 * newVars.indexOf(vname), pty );
+            ctx.lineTo(ptx - GATE_SIZE / 8, pty );
+            ctx.stroke();
+            pty += WIRE_GAP * 3;
+            return { x: ptx, y: pty - WIRE_GAP * 3 };
+        }
+    }
+
+    const getNorRecs3 = (dnf) => {
+        if(dnf.length > 1) {
+            let mid = Math.floor(dnf.length / 2);
+            // return `\\overline{\\overline{${getNorRec3(dnf.slice(0, mid), part)} + ${getNorRec3(dnf.slice(mid), part)}}}`;
+            let pos1 = getNorRecs3(dnf.slice(0, mid)); 
+            let pos2 = getNorRecs3(dnf.slice(mid));
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(pos1.x, pos1.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, pos1.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, (pos1.y + pos2.y) / 2 - WIRE_GAP * 3 / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP, (pos1.y + pos2.y) / 2 - WIRE_GAP * 3 / 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(pos2.x, pos2.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, pos2.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, (pos1.y + pos2.y) / 2 + WIRE_GAP * 3 / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP, (pos1.y + pos2.y) / 2 + WIRE_GAP * 3 / 2);
+            ctx.stroke();
+            drawNorGate2(ctx, Math.max(pos1.x, pos2.x) + COMP_GAP + GATE_SIZE / 2, (pos1.y + pos2.y) / 2);
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(Math.max(pos1.x, pos2.x) + COMP_GAP + GATE_SIZE * 6 / 5, (pos1.y + pos2.y) / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP * 3 / 2 + GATE_SIZE * 6 / 5, (pos1.y + pos2.y) / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP * 3 / 2 + GATE_SIZE * 6 / 5, (pos1.y + pos2.y) / 2 - WIRE_GAP * 3 / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP * 2 + GATE_SIZE * 6 / 5, (pos1.y + pos2.y) / 2 - WIRE_GAP * 3 / 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(Math.max(pos1.x, pos2.x) + COMP_GAP * 3 / 2 + GATE_SIZE * 6 / 5, (pos1.y + pos2.y) / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP * 3 / 2 + GATE_SIZE * 6 / 5, (pos1.y + pos2.y) / 2 + WIRE_GAP * 3 / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP * 2 + GATE_SIZE * 6 / 5, (pos1.y + pos2.y) / 2 + WIRE_GAP * 3 / 2);
+            ctx.stroke();
+            drawNorGate2(ctx, Math.max(pos1.x, pos2.x) + COMP_GAP * 2 + GATE_SIZE * 6 / 5 + GATE_SIZE / 2, (pos1.y + pos2.y) / 2);
+            return { x: Math.max(pos1.x, pos2.x) + (COMP_GAP + GATE_SIZE * 6 / 5) * 2, y: (pos1.y + pos2.y) / 2 };
+        } else {
+            let mid = Math.floor(dnf[0].length / 2);
+            if(dnf[0].length == 1) {
+                // if(dnf[0][0].comp) return `\\overline{${mapVar(dnf[0][0].name)}}`;
+                // else return mapVar(dnf[0][0].name);
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(ptx - GATE_SIZE / 8, pty);
+                ctx.lineTo(ptx, pty);
+                ctx.stroke();
+                let vname = (dnf[0][0].comp ? '!':'') + dnf[0][0].name;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(WIRE_GAP2 + WIRE_GAP2 * 2 * newVars.indexOf(vname), pty );
+                ctx.lineTo(ptx - GATE_SIZE / 8, pty );
+                ctx.stroke();
+                pty += WIRE_GAP * 3;
+                return { x: ptx, y: pty - WIRE_GAP * 3 };
+            }
+            // return `\\overline{${getNorRec4(dnf[0].slice(0, mid))} + ${getNorRec4(dnf[0].slice(mid))}}`;
+            let pos1 = getNorRecs4(dnf[0].slice(0, mid)); 
+            let pos2 = getNorRecs4(dnf[0].slice(mid));
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(pos1.x, pos1.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, pos1.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, (pos1.y + pos2.y) / 2 - WIRE_GAP * 3 / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP, (pos1.y + pos2.y) / 2 - WIRE_GAP * 3 / 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(pos2.x, pos2.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, pos2.y);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP / 2, (pos1.y + pos2.y) / 2 + WIRE_GAP * 3 / 2);
+            ctx.lineTo(Math.max(pos1.x, pos2.x) + COMP_GAP, (pos1.y + pos2.y) / 2 + WIRE_GAP * 3 / 2);
+            ctx.stroke();
+            drawNorGate2(ctx, Math.max(pos1.x, pos2.x) + COMP_GAP + GATE_SIZE / 2, (pos1.y + pos2.y) / 2);
+            return { x: Math.max(pos1.x, pos2.x) + (COMP_GAP + GATE_SIZE * 6 / 5), y: (pos1.y + pos2.y) / 2 };
+        }
+    };
+
+    let pos = getNorRecs3(mdnf, vars);
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+    ctx.lineTo(pos.x + GATE_SIZE * 1.5, pos.y);
+    ctx.stroke();
+
+    const rest = createElem('p', `\\[f\\]`, '');
+    rest.style.top = `${pos.y - NOT_TOP + 5}px`;
+    rest.style.left = `${pos.x + GATE_SIZE * 3 / 2}px`;
     canvasCon.appendChild(rest);
 };
 

@@ -592,6 +592,77 @@ const getNorRec2 = (dnf) => {
     }
 };
 
+const getNor3 = (dnf) => {
+    let mdnf = karnaugh.mdnf.map(pr => {
+        return pr.map(i => {
+            if(i.comp) return `\\overline{${mapVar(i.name)}}`;
+            else return mapVar(i.name);
+        }).join('\\cdot ');
+    }).join(' + ');
+    let str = `\\[f(${vars.map(mapVar).join(',')}) = ${mdnf} = \\]`;
+    document.querySelector('.res-q').appendChild(createElem("p", str, ''));
+    mdnf = karnaugh.mdnf.map(pr => {
+        return `\\overline{\\overline{${pr.map(i => {
+            if(i.comp) return `\\overline{${mapVar(i.name)}}`;
+            else return mapVar(i.name);
+        }).join('\\cdot ')}}}`;
+    }).join(' + ');
+    str = `\\[ = ${mdnf} = \\]`;
+    document.querySelector('.res-q').appendChild(createElem("p", str, ''));
+    mdnf = karnaugh.mdnf.map(pr => {
+        if(pr.length == 1) {
+            if(pr[0].comp) return `\\overline{${mapVar(pr[0].name)}}`;
+            else return mapVar(pr[0].name);
+        }
+        return `\\overline{${pr.map(i => {
+            if(i.comp) return mapVar(i.name);
+            else return `\\overline{${mapVar(i.name)}}`;
+        }).join(' + ')}}`;
+    }).join(' + ');
+    str = `\\[ = ${mdnf} = \\]`;
+    document.querySelector('.res-q').appendChild(createElem("p", str, ''));
+    str = `\\[ = ${getNorRec3(karnaugh.mdnf, 0)} = \\]`;
+    document.querySelector('.res-q').appendChild(createElem("p", str, ''));
+    str = `\\[ = ${getNorRec3(karnaugh.mdnf, 1)} = \\]`;
+    document.querySelector('.res-q').appendChild(createElem("p", str, ''));
+};
+
+const getNorRec3 = (dnf, part) => {
+    if(dnf.length > 1) {
+        let mid = Math.floor(dnf.length / 2);
+        return `\\overline{\\overline{${getNorRec3(dnf.slice(0, mid), part)} + ${getNorRec3(dnf.slice(mid), part)}}}`;
+    } else {
+        if(part == 0) {
+            if(dnf[0].length == 1) {
+                // console.log(dnf[0])
+                if(dnf[0][0].comp) return `\\overline{${mapVar(dnf[0][0].name)}}`;
+                else return mapVar(dnf[0][0].name);
+            }
+            return `\\overline{${dnf[0].map(i => {
+                if(i.comp) return mapVar(i.name);
+                else return `\\overline{${mapVar(i.name)}}`;
+            }).join(' + ')}}`;
+        } else {
+            let mid = Math.floor(dnf[0].length / 2);
+            if(dnf[0].length == 1) {
+                if(dnf[0][0].comp) return `\\overline{${mapVar(dnf[0][0].name)}}`;
+                else return mapVar(dnf[0][0].name);
+            }
+            return `\\overline{${getNorRec4(dnf[0].slice(0, mid))} + ${getNorRec4(dnf[0].slice(mid))}}`;
+        }
+    }
+};
+
+const getNorRec4 = (dnf) => {
+    if(dnf.length > 1) {
+        let mid = Math.floor(dnf.length / 2);
+        return `\\overline{\\overline{${getNorRec4(dnf.slice(0, mid))} + ${getNorRec4(dnf.slice(mid))}}}`;
+    } else {
+        if(dnf[0].comp) return mapVar(dnf[0].name);
+        else return `\\overline{${mapVar(dnf[0].name)}}`;
+    }
+}
+
 // Solve
 const solve = () => {
     document.querySelector('.res-q').innerHTML = '';
@@ -618,14 +689,16 @@ const solve = () => {
     document.querySelector('.res-q').appendChild(createElem("h5", "Višeulazna logička kola", "text-center p-4"));
     createCanvasDNF(karnaugh.mdnf, vars);
     document.querySelector('.res-q').appendChild(createElem("h5", "Dvoulazna logička kola", "text-center p-4"));
-    createCanvasDNF2(karnaugh.mdnf, vars);
+    // createCanvasDNF2(karnaugh.mdnf, vars);
+    createCanvasDNF3(karnaugh.mdnf, vars);
     document.querySelector('.res-q').appendChild(createElem("h4", "Minimalni KNF (Karnoova mapa)", "text-center p-4"));
     getMKNF();
     document.querySelector('.res-q').appendChild(createElem("h4", "Minimalni KNF (Logičko kolo)", "text-center p-4"));
     document.querySelector('.res-q').appendChild(createElem("h5", "Višeulazna logička kola", "text-center p-4"));
     createCanvasKNF(karnaugh.mknf, vars);
     document.querySelector('.res-q').appendChild(createElem("h5", "Dvoulazna logička kola", "text-center p-4"));
-    createCanvasKNF2(karnaugh.mknf, vars);
+    // createCanvasKNF2(karnaugh.mknf, vars);
+    createCanvasKNF3(karnaugh.mknf, vars);
     document.querySelector('.res-q').appendChild(createElem("h4", "Logičko kolo koristeći NI kola", "text-center p-4"));
     document.querySelector('.res-q').appendChild(createElem("h5", "Višeulazna logička kola", "text-center p-4"));
     getNand();
@@ -640,11 +713,14 @@ const solve = () => {
     document.querySelector('.res-q').appendChild(createElem("h5", "Dvoulazna logička kola", "text-center p-4"));
     getNor2();
     createCanvasNOR2(karnaugh.mknf, vars);
+    document.querySelector('.res-q').appendChild(createElem("h5", "Dvoulazna logička kola ( preko DNF )", "text-center p-4"));
+    getNor3();
+    createCanvasNOR3(karnaugh.mdnf, vars);
     MathJax.typeset();
 };
 
 const solveTable = () => {
-    const table = createElem("table", "", "table-fixed table-bordered w-25 mx-auto text-center");
+    const table = createElem("table", "", "ttable table-bordered w-25 mx-auto text-center");
     const thr = createElem("tr", "", "");
     vars.forEach(i => thr.appendChild(createElem("th", `\\[${mapVar(i)}\\]`, "")));
     thr.appendChild(createElem("th", "\\[f\\]", ""));
@@ -778,7 +854,7 @@ document.getElementById('create').onclick = () => {
     truthTable = [];
     vars = [];
 
-    const table = createElem("table", '', "table-fixed table-bordered w-25 mx-auto text-center");
+    const table = createElem("table", '', "ttable table-fixed table-bordered w-25 mx-auto text-center");
     const thr = createElem("tr", "");
 
     for(let i=0;i<varNum;i++) {
@@ -798,7 +874,9 @@ document.getElementById('create').onclick = () => {
         }
         truthTable.push(pomArr);
         pomArr.forEach(i => tr2.appendChild(createElem("td", i, "")));
-        tr2.appendChild(createElemIH("td", `<input class="form-control" type="text" placeholder="f">`, 'col-sm-1'));
+        const tdn = createElemIH("td", `<input class="form-control" type="text" placeholder="f">`, 'col-sm-1');
+        tdn.style.padding = '0';
+        tr2.appendChild(tdn);
         table.appendChild(tr2);
     }
 
