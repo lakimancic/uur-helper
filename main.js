@@ -182,110 +182,42 @@ const getKarnaughTable = () => {
 
 const getMDNF = () => {
     let xn = karnaugh.map[0].length, yn = karnaugh.map.length;
-    let mapMask = [];
-    for(let i=0;i<yn;i++) {
-        let maskRow = [];
-        for(let j=0;j<xn;j++) maskRow.push(false);
-        mapMask.push(maskRow);
-    }
-    let figures = [];
-    let ended = false;
-    for(let i=xn;i>0;i>>=1) {
-        for(let j=yn;j>0;j>>=1) {
-            for(let p=0;p<yn;p+=Math.max(1, j >> 1)) {
-                for(let q=0;q<xn;q+=Math.max(1, i >> 1)) {
-                    let allUsed = true, allOnes = true;
-                    for(let x=q;x<q+i;x++) {
-                        for(let y=p;y<p+j;y++) {
-                            if(karnaugh.map[y % yn][x % xn] == 0) {
-                                allOnes = false;
-                                break;
-                            }
-                            allUsed = allUsed && mapMask[y % yn][x % xn];
-                        }
-                        if(!allOnes) {
-                            break;
-                        }
-                    }
-                    if(allOnes && !allUsed) {
-                        for(let x=q;x<q+i;x++) {
-                            for(let y=p;y<p+j;y++) {
-                                mapMask[y % yn][x % xn] = true;
-                            }
-                        }
-                        figures.push({ y: p, x: q, xs: i, ys: j });
-                        let isFull = true;
-                        for(let x=0;x<xn;x++) {
-                            for(let y=0;y<yn;y++) {
-                                if(karnaugh.map[y][x] == 1) isFull = isFull && mapMask[y][x];
-                            }
-                        }
-                        if(isFull) {
-                            ended = true;
-                            break;
-                        }
-                    }
-                }
-                if(ended) break;
+    let { prods, bins } = solveKarnaughDNF(truthTable);
+    karnaugh.mdnf = prods;
+    if(vars.length <= 4) {
+        let {frameTable, mapTable} = getKarnaughTable();
+        document.querySelector('.res-q').appendChild(frameTable);
+        let figs = getFiguresDNF(vars, bins);
+        figs.forEach(i => {
+            let figureElem = createElem('div', '', 'circ');
+            figureElem.style.width = `${i.xs * 100 - 10}%`;
+            figureElem.style.height = `${i.ys * 100 - 10}%`;
+            mapTable.childNodes[i.y+1].childNodes[i.x+1].appendChild(figureElem);
+            if(i.x + i.xs > xn) {
+                let figureElem2 = createElem('div', '', 'circ');
+                figureElem2.style.width = `${i.xs * 100 - 10}%`;
+                figureElem2.style.height = `${i.ys * 100 - 10}%`;
+                figureElem2.style.left = `${((i.x + i.xs) % xn - i.xs) * 100 + 5}%`;
+                mapTable.childNodes[i.y+1].childNodes[(i.x + i.xs) % xn].appendChild(figureElem2);
             }
-            if(ended) break;
-        }
-        if(ended) break;
-    }
-    let {frameTable, mapTable} = getKarnaughTable();
-    document.querySelector('.res-q').appendChild(frameTable);
-    let products = [];
-    figures.forEach(i => {
-        let figureElem = createElem('div', '', 'circ');
-        figureElem.style.width = `${i.xs * 100 - 10}%`;
-        figureElem.style.height = `${i.ys * 100 - 10}%`;
-        mapTable.childNodes[i.y+1].childNodes[i.x+1].appendChild(figureElem);
-        if(i.x + i.xs > xn) {
-            let figureElem2 = createElem('div', '', 'circ');
-            figureElem2.style.width = `${i.xs * 100 - 10}%`;
-            figureElem2.style.height = `${i.ys * 100 - 10}%`;
-            figureElem2.style.left = `${((i.x + i.xs) % xn - i.xs) * 100 + 5}%`;
-            mapTable.childNodes[i.y+1].childNodes[(i.x + i.xs) % xn].appendChild(figureElem2);
-        }
-        if(i.y + i.ys > yn) {
-            let figureElem2 = createElem('div', '', 'circ');
-            figureElem2.style.width = `${i.xs * 100 - 10}%`;
-            figureElem2.style.height = `${i.ys * 100 - 10}%`;
-            figureElem2.style.top = `${((i.y + i.ys) % yn - i.ys) * 100 + 5}%`;
-            mapTable.childNodes[(i.y + i.ys) % yn].childNodes[i.x+1].appendChild(figureElem2);
-        }
-        if(i.x + i.xs > xn && i.y + i.ys > yn) {
-            let figureElem2 = createElem('div', '', 'circ');
-            figureElem2.style.width = `${i.xs * 100 - 10}%`;
-            figureElem2.style.height = `${i.ys * 100 - 10}%`;
-            figureElem2.style.top = `${((i.y + i.ys) % yn - i.ys) * 100 + 5}%`;
-            figureElem2.style.left = `${((i.x + i.xs) % xn - i.xs) * 100 + 5}%`;
-            mapTable.childNodes[(i.y + i.ys) % yn].childNodes[(i.x + i.xs) % xn].appendChild(figureElem2);
-        }
-        let whatXVars = new Array(karnaugh.varsX.length).fill(true);
-        let whatYVars = new Array(karnaugh.varsY.length).fill(true);
-        for(let k=i.x+1;k<i.x+i.xs;k++) {
-            for(let j=0;j<karnaugh.varsX.length;j++) whatXVars[j] = whatXVars[j] && getGrays((k-1) % xn, karnaugh.varsX.length)[j] == getGrays(k % xn, karnaugh.varsX.length)[j];
-        }
-        for(let k=i.y+1;k<i.y+i.ys;k++) {
-            for(let j=0;j<karnaugh.varsY.length;j++) whatYVars[j] = whatYVars[j] && getGrays((k-1) % yn, karnaugh.varsY.length)[j] == getGrays(k % yn, karnaugh.varsY.length)[j];
-        }
-        let product = [];
-        whatXVars.forEach((k, ind) => {
-            if(k) {
-                product.push({ name: karnaugh.varsX[ind], comp: getGrays(i.x, karnaugh.varsX.length)[ind] == '0'});
+            if(i.y + i.ys > yn) {
+                let figureElem2 = createElem('div', '', 'circ');
+                figureElem2.style.width = `${i.xs * 100 - 10}%`;
+                figureElem2.style.height = `${i.ys * 100 - 10}%`;
+                figureElem2.style.top = `${((i.y + i.ys) % yn - i.ys) * 100 + 5}%`;
+                mapTable.childNodes[(i.y + i.ys) % yn].childNodes[i.x+1].appendChild(figureElem2);
+            }
+            if(i.x + i.xs > xn && i.y + i.ys > yn) {
+                let figureElem2 = createElem('div', '', 'circ');
+                figureElem2.style.width = `${i.xs * 100 - 10}%`;
+                figureElem2.style.height = `${i.ys * 100 - 10}%`;
+                figureElem2.style.top = `${((i.y + i.ys) % yn - i.ys) * 100 + 5}%`;
+                figureElem2.style.left = `${((i.x + i.xs) % xn - i.xs) * 100 + 5}%`;
+                mapTable.childNodes[(i.y + i.ys) % yn].childNodes[(i.x + i.xs) % xn].appendChild(figureElem2);
             }
         });
-        whatYVars.forEach((k, ind) => {
-            if(k) {
-                product.push({ name: karnaugh.varsY[ind], comp: getGrays(i.y, karnaugh.varsY.length)[ind] == '0'});
-            }
-        });
-        product.sort((a, b) => a.name > b.name ? 1 : -1);
-        products.push(product);
-    });
-    karnaugh.mdnf = products;
-    let mdnf = products.map(pr => {
+    }
+    let mdnf = karnaugh.mdnf.map(pr => {
         return pr.map(i => {
             if(i.comp) return `\\overline{${mapVar(i.name)}}`;
             else return mapVar(i.name);
@@ -298,110 +230,42 @@ const getMDNF = () => {
 
 const getMKNF = () => {
     let xn = karnaugh.map[0].length, yn = karnaugh.map.length;
-    let mapMask = [];
-    for(let i=0;i<yn;i++) {
-        let maskRow = [];
-        for(let j=0;j<xn;j++) maskRow.push(false);
-        mapMask.push(maskRow);
-    }
-    let figures = [];
-    let ended = false;
-    for(let i=xn;i>0;i>>=1) {
-        for(let j=yn;j>0;j>>=1) {
-            for(let p=0;p<yn;p+=Math.max(1, j >> 1)) {
-                for(let q=0;q<xn;q+=Math.max(1, i >> 1)) {
-                    let allUsed = true, allZeros = true;
-                    for(let x=q;x<q+i;x++) {
-                        for(let y=p;y<p+j;y++) {
-                            if(karnaugh.map[y % yn][x % xn] == 1) {
-                                allZeros = false;
-                                break;
-                            }
-                            allUsed = allUsed && mapMask[y % yn][x % xn];
-                        }
-                        if(!allZeros) {
-                            break;
-                        }
-                    }
-                    if(allZeros && !allUsed) {
-                        for(let x=q;x<q+i;x++) {
-                            for(let y=p;y<p+j;y++) {
-                                mapMask[y % yn][x % xn] = true;
-                            }
-                        }
-                        figures.push({ y: p, x: q, xs: i, ys: j });
-                        let isFull = true;
-                        for(let x=0;x<xn;x++) {
-                            for(let y=0;y<yn;y++) {
-                                if(karnaugh.map[y][x] == 0) isFull = isFull && mapMask[y][x];
-                            }
-                        }
-                        if(isFull) {
-                            ended = true;
-                            break;
-                        }
-                    }
-                }
-                if(ended) break;
+    let { prods, bins } = solveKarnaughKNF(truthTable);
+    karnaugh.mknf = prods;
+    if(vars.length <= 4) {
+        let {frameTable, mapTable} = getKarnaughTable();
+        document.querySelector('.res-q').appendChild(frameTable);
+        let figs = getFiguresDNF(vars, bins);
+        figs.forEach(i => {
+            let figureElem = createElem('div', '', 'circ');
+            figureElem.style.width = `${i.xs * 100 - 10}%`;
+            figureElem.style.height = `${i.ys * 100 - 10}%`;
+            mapTable.childNodes[i.y+1].childNodes[i.x+1].appendChild(figureElem);
+            if(i.x + i.xs > xn) {
+                let figureElem2 = createElem('div', '', 'circ');
+                figureElem2.style.width = `${i.xs * 100 - 10}%`;
+                figureElem2.style.height = `${i.ys * 100 - 10}%`;
+                figureElem2.style.left = `${((i.x + i.xs) % xn - i.xs) * 100 + 5}%`;
+                mapTable.childNodes[i.y+1].childNodes[(i.x + i.xs) % xn].appendChild(figureElem2);
             }
-            if(ended) break;
-        }
-        if(ended) break;
-    }
-    let {frameTable, mapTable} = getKarnaughTable();
-    document.querySelector('.res-q').appendChild(frameTable);
-    let sums = [];
-    figures.forEach(i => {
-        let figureElem = createElem('div', '', 'circ');
-        figureElem.style.width = `${i.xs * 100 - 10}%`;
-        figureElem.style.height = `${i.ys * 100 - 10}%`;
-        mapTable.childNodes[i.y+1].childNodes[i.x+1].appendChild(figureElem);
-        if(i.x + i.xs > xn) {
-            let figureElem2 = createElem('div', '', 'circ');
-            figureElem2.style.width = `${i.xs * 100 - 10}%`;
-            figureElem2.style.height = `${i.ys * 100 - 10}%`;
-            figureElem2.style.left = `${((i.x + i.xs) % xn - i.xs) * 100 + 5}%`;
-            mapTable.childNodes[i.y+1].childNodes[(i.x + i.xs) % xn].appendChild(figureElem2);
-        }
-        if(i.y + i.ys > yn) {
-            let figureElem2 = createElem('div', '', 'circ');
-            figureElem2.style.width = `${i.xs * 100 - 10}%`;
-            figureElem2.style.height = `${i.ys * 100 - 10}%`;
-            figureElem2.style.top = `${((i.y + i.ys) % yn - i.ys) * 100 + 5}%`;
-            mapTable.childNodes[(i.y + i.ys) % yn].childNodes[i.x+1].appendChild(figureElem2);
-        }
-        if(i.x + i.xs > xn && i.y + i.ys > yn) {
-            let figureElem2 = createElem('div', '', 'circ');
-            figureElem2.style.width = `${i.xs * 100 - 10}%`;
-            figureElem2.style.height = `${i.ys * 100 - 10}%`;
-            figureElem2.style.top = `${((i.y + i.ys) % yn - i.ys) * 100 + 5}%`;
-            figureElem2.style.left = `${((i.x + i.xs) % xn - i.xs) * 100 + 5}%`;
-            mapTable.childNodes[(i.y + i.ys) % yn].childNodes[(i.x + i.xs) % xn].appendChild(figureElem2);
-        }
-        let whatXVars = new Array(karnaugh.varsX.length).fill(true);
-        let whatYVars = new Array(karnaugh.varsY.length).fill(true);
-        for(let k=i.x+1;k<i.x+i.xs;k++) {
-            for(let j=0;j<karnaugh.varsX.length;j++) whatXVars[j] = whatXVars[j] && getGrays((k-1) % xn, karnaugh.varsX.length)[j] == getGrays(k % xn, karnaugh.varsX.length)[j];
-        }
-        for(let k=i.y+1;k<i.y+i.ys;k++) {
-            for(let j=0;j<karnaugh.varsY.length;j++) whatYVars[j] = whatYVars[j] && getGrays((k-1) % yn, karnaugh.varsY.length)[j] == getGrays(k % yn, karnaugh.varsY.length)[j];
-        }
-        let sum = [];
-        whatXVars.forEach((k, ind) => {
-            if(k) {
-                sum.push({ name: karnaugh.varsX[ind], comp: getGrays(i.x, karnaugh.varsX.length)[ind] == '1'});
+            if(i.y + i.ys > yn) {
+                let figureElem2 = createElem('div', '', 'circ');
+                figureElem2.style.width = `${i.xs * 100 - 10}%`;
+                figureElem2.style.height = `${i.ys * 100 - 10}%`;
+                figureElem2.style.top = `${((i.y + i.ys) % yn - i.ys) * 100 + 5}%`;
+                mapTable.childNodes[(i.y + i.ys) % yn].childNodes[i.x+1].appendChild(figureElem2);
+            }
+            if(i.x + i.xs > xn && i.y + i.ys > yn) {
+                let figureElem2 = createElem('div', '', 'circ');
+                figureElem2.style.width = `${i.xs * 100 - 10}%`;
+                figureElem2.style.height = `${i.ys * 100 - 10}%`;
+                figureElem2.style.top = `${((i.y + i.ys) % yn - i.ys) * 100 + 5}%`;
+                figureElem2.style.left = `${((i.x + i.xs) % xn - i.xs) * 100 + 5}%`;
+                mapTable.childNodes[(i.y + i.ys) % yn].childNodes[(i.x + i.xs) % xn].appendChild(figureElem2);
             }
         });
-        whatYVars.forEach((k, ind) => {
-            if(k) {
-                sum.push({ name: karnaugh.varsY[ind], comp: getGrays(i.y, karnaugh.varsY.length)[ind] == '1'});
-            }
-        });
-        sum.sort((a, b) => a.name > b.name ? 1 : -1);
-        sums.push(sum);
-    });
-    karnaugh.mknf = sums;
-    let mknf = sums.map(pr => {
+    }
+    let mknf = karnaugh.mknf.map(pr => {
         return '(' + pr.map(i => {
             if(i.comp) return `\\overline{${mapVar(i.name)}}`;
             else return mapVar(i.name);

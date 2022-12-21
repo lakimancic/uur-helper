@@ -1548,7 +1548,6 @@ const createCanvasNOR3 = (gdnf, vars) => {
         }
         ptx += WIRE_GAP2 * 2;
     });
-    console.log(newVars);
 
     let ttx = ptx;
     let pty = TEXT_PAD + NOT_TOP + GATE_SIZE + COMP_GAP;
@@ -1595,9 +1594,7 @@ const createCanvasNOR3 = (gdnf, vars) => {
             ctx.moveTo(ptx - GATE_SIZE / 8, pty);
             ctx.lineTo(ptx, pty);
             ctx.stroke();
-            console.log(dnf);
             let vname = (dnf[0].comp ? '!':'') + dnf[0].name;
-            console.log(vname);
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(WIRE_GAP2 + WIRE_GAP2 * 2 * newVars.indexOf(vname), pty );
