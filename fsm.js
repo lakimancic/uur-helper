@@ -35,6 +35,7 @@ const canvas = document.getElementById('graph');
 let stateN = 0;
 let states = [];
 let mMat = [];
+let actions = [];
 
 const rotateAround = (p1, p2, angle) => {
     return {
@@ -607,6 +608,9 @@ document.getElementById('addState').onclick = async () => {
             name: formValues[0],
             nodes: {}
         });
+        actions.push({
+            type: 0
+        });
         renderGraph();
     }
 };
@@ -632,7 +636,7 @@ document.getElementById('addConn').onclick = async () => {
     });
 
     if(formValues) {
-        states.forEach(i => {
+        states.forEach((i, ind) => {
             if(i.name == formValues[1]) {
                 // i.nodes.push({
                 //     to: states.findIndex(j => j.name == formValues[2]),
@@ -641,6 +645,11 @@ document.getElementById('addConn').onclick = async () => {
                 const to = states.findIndex(j => j.name == formValues[2]);
                 if(i.nodes[to]) i.nodes[to] = i.nodes[to].concat(formValues[0].split('+'));
                 else i.nodes[to] = formValues[0].split('+');
+                actions.push({
+                    type: 1,
+                    from: ind, to: to,
+                    len: formValues[0].split('+').length
+                });
             }
         });
         renderGraph();
@@ -650,3 +659,25 @@ document.getElementById('addConn').onclick = async () => {
 document.getElementById('analyze').onclick = solve;
 
 document.getElementById('findPs').onclick = solvePaths;
+
+document.getElementById('undoAct').onclick = () => {
+    if(actions.length > 0) {
+        let action = actions.pop();
+        if(action.type == 0) {
+            states.pop();
+            stateN--;
+        }
+        else {
+            for(let i=0;i<action.len;i++) states[action.from].nodes[action.to].pop();
+            if(states[action.from].nodes[action.to].length == 0) delete states[action.from].nodes[action.to];
+        }
+        renderGraph();
+    }
+};
+
+document.getElementById('clearAll').onclick = () => {
+    actions = [];
+    stateN = 0;
+    states = [];
+    renderGraph();
+};
