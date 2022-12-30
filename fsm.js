@@ -492,7 +492,7 @@ const solve = () => {
         }
         let qind = parseInt(pomArr.slice(0, nq).join(''), 2);
         let aind = parseInt(pomArr.slice(nq).join(''), 2);
-        if(qind < Q.length) {
+        if(qind < Q.length && aind < A.length) {
             let qp1 = Q.findIndex(j => j == states[changeTable[aind][qind]].name.split('/')[0]);
             let str = numToBin(qp1, Q.length);
             for(let i=0;i<str.length;i++) pomArr.push(str[i]);
