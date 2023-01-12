@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uvod u računarstvo</title>
+    <!-- BOOTSTRAP -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- JQUERY -->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+    <!-- SWEET ALERT -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- MATHJAX -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" id="MathJax-script" async defer></script>
+    <!-- SCRIPTS -->
+    <script type="module" src="../js/bcd.js" defer></script>
+    <!-- STYLES -->
+    <link rel="stylesheet" href="../css/bcd.css">
+</head>
+<body>
+    <!-- HEADER -->
+    <div class="container-fluid p-4 bg-primary text-white text-center">
+        <a href="../index.html" class="text-white text-decoration-none"><h1>Uvod u Računarstvo</h1></a>
+        <h3>BCD kodovi i sabiranje brojeva u prirodnom BCD</h3>
+    </div>
+    <!-- CONTENT -->
+    <div class="container mt-5">
+        <div class="row">
+            <h4 class="text-center mb-4">Tablica težinskih BCD kodova</h4>
+            <div id="res1">
+                <table class="bcd">
+                    <tr>
+                        <th>Dekadna cifra</th>
+                        <th>8421</th>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>0001</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <h4 class="text-center mb-4">Tablica specijalnih BCD kodova</h4>
+            <div id="res2">
+            </div>
+        </div>
+        <div class="row">
+            <h4 class="text-center mb-4">Pretvaranje dekadnih brojeva u BCD kodove</h4>
+            <div class="input-group mb-3 text-center">
+                <input class="form-control w-25" type="text" id="num1" placeholder="Dekadni broj">
+                <select class="form-select" id="bcd1">
+                    <option selected hidden value="nil">BCD kod</option>
+                    <option value="8421">8421</option>
+                    <option value="2421">2421</option>
+                    <option value="5421">5421</option>
+                    <option value="5211">5211</option>
+                    <option value="4221">4221</option>
+                    <option value="3321">3321</option>
+                    <option value="gray">Grejov kod</option>
+                    <option value="hamm">Hafmenov kod</option>
+                    <option value="exc3">"višak 3"</option>
+                </select>
+            </div>
+            <div class="input-group mb-3 text-center">
+                <button class="btn btn-success px-3 m-auto" id="calc1">Pretvori</button>
+            </div>
+            <div id="res3">
+            </div>
+        </div>
+        <div class="row">
+            <h4 class="text-center mb-4">Sabiranje dekadnih brojeva preko prirodnog BCD koda</h4>
+            <div class="input-group mb-3 text-center">
+                <input class="form-control w-25" type="text" id="num2" placeholder="Prvi sabirak">
+                <input class="form-control w-25" type="text" id="num3" placeholder="Drugi sabirak">
+            </div>
+            <div class="input-group mb-3 text-center">
+                <button class="btn btn-success px-3 m-auto" id="calc2">Saberi</button>
+            </div>
+            <div id="res4">
+            </div>
+        </div>
+    </div>
+</body>
+</html>

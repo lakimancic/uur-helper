@@ -1,0 +1,14 @@
+table.bcd {
+    margin: 2rem auto;
+    margin-top: 1rem;
+    font-size: 1.2rem;
+    text-align: center;
+    vertical-align: middle;
+
+    table-layout: fixed;
+}
+
+table.bcd td, table.bcd th {
+    border: 1px solid black;
+    padding: 0.2rem 0.5rem;
+}

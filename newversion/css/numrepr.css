@@ -1,0 +1,87 @@
+@font-face {
+    font-family: cmFont;
+    src: url(../assets/cmu.serif-roman.ttf);
+}
+
+table.reg {
+    margin: 2rem auto;
+    font-family: cmFont;
+    font-weight: bold;
+    font-size: 1.5rem;
+    text-align: center;
+    vertical-align: middle;
+
+    table-layout: fixed;
+}
+
+table.reg td {
+    position: relative;
+
+    min-width: 1.8rem;
+    height: 2rem;
+
+    border: 1px solid black;
+
+    background-clip: padding-box;
+
+    user-select: none;
+    cursor: normal;
+}
+
+table.reg tr:nth-child(2) td .index {
+    display: block;
+    width: 100%;
+
+    position: absolute;
+    top: 100%;
+
+    font-size: 1rem;
+    font-weight: normal;
+}
+
+table.reg tr:nth-child(1) td .index {
+    display: block;
+    width: 100%;
+
+    position: absolute;
+    bottom: 100%;
+
+    font-size: 1rem;
+    font-weight: normal;
+}
+
+.legend {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin-bottom: 2rem;
+}
+
+.legend .item {
+    font-family: cmFont;
+    font-style: italic;
+    font-size: 1.2rem;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin: 0 1rem;
+}
+
+.legend .item .square {
+    display: block;
+    width: 0.5rem;
+    height: 0.5rem;
+    
+    background-color: #eeece1;
+    margin: 0 0.5rem;
+}
+
+#res3 {
+    font-family: cmFont;
+    font-size: 1.5rem;
+
+    text-align: center;
+}

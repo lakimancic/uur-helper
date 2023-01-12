@@ -1,0 +1,92 @@
+-- Arithmetic and logic
+ADD     0001 ____ ____ ____ - DEST OP1 OP2
+SUB     0010 ____ ____ ____ - DEST OP1 OP2
+AND     0011 ____ ____ ____ - DEST OP1 OP2
+OR      0100 ____ ____ ____ - DEST OP1 OP2
+XOR     0101 ____ ____ ____ - DEST OP1 OP2
+MUL     0110 ____ ____ ____ - DEST OP1 OP2
+DIV     0111 ____ ____ ____ - DEST OP1 OP2
+CMP     1000 ____ ____ ____ - DEST OP1 OP2
+-- Data transfer
+LD      1001 ____ ____ ____ - DEST [ADDR]
+MOV     1010 ____ ____ ____ - DEST IMM_VAL
+ST      1011 ____ ____ ____ - SRC [ADDR]
+-- Arithmetic and logic
+ADD     1100 0000 ____ ____ - DEST OP
+SUB     1100 0001 ____ ____ - DEST OP
+AND     1100 0010 ____ ____ - DEST OP
+OR      1100 0011 ____ ____ - DEST OP
+XOR     1100 0100 ____ ____ - DEST OP
+MUL     1100 0101 ____ ____ - DEST OP
+DIV     1100 0110 ____ ____ - DEST OP
+SHR     1100 0111 ____ ____ - SRC VAL
+ROR     1100 1000 ____ ____ - SRC VAL
+NOT     1100 1001 ____ ____ - DEST SRC
+NEG     1100 1010 ____ ____ - DEST SRC
+CMP     1100 1011 ____ ____ - OP1 OP2
+-- Data Transfer
+MOV     1100 1100 ____ ____ - DEST SRC
+LD      1100 1101 ____ ____ - DEST [SRC]
+ST      1100 1110 ____ ____ - SRC [DEST]
+-- Arithmetic and logic
+CMP     1100 1111 ____ ____ - VAL
+ADD     1101 0000 ____ ____ - VAL
+SUB     1101 0001 ____ ____ - VAL
+AND     1101 0010 ____ ____ - VAL
+OR      1101 0011 ____ ____ - VAL
+XOR     1101 0100 ____ ____ - VAL
+MUL     1101 0101 ____ ____ - VAL
+DIV     1101 0110 ____ ____ - VAL
+-- Jump Instructions
+JMP     1110 0000 ____ ____ - ADDR
+JE      1110 0001 ____ ____ - ADDR
+JNE     1110 0010 ____ ____ - ADDR
+JG      1110 0011 ____ ____ - ADDR
+JGE     1110 0100 ____ ____ - ADDR
+JL      1110 0101 ____ ____ - ADDR
+JLE     1110 0110 ____ ____ - ADDR
+-- Data Transfer
+ST      1110 1000 ____ ____ - ADDR
+LD      1110 1001 ____ ____ - ADDR
+MOV     1110 1010 ____ ____ - AC IMM_VAL
+MOV     1110 1011 ____ ____ - DR IMM_VAL
+-- Arithmetic and logic
+ADD     1101 0111 0000 ____ - OP
+SUB     1101 0111 0001 ____ - OP
+AND     1101 0111 0010 ____ - OP
+OR      1101 0111 0011 ____ - OP
+XOR     1101 0111 0100 ____ - OP
+MUL     1101 0111 0101 ____ - OP
+DIV     1101 0111 0110 ____ - OP
+SHR     1101 0111 0111 ____ - OP
+ROR     1101 0111 1000 ____ - OP
+NOT     1101 0111 1001 ____ - OP
+NEG     1101 0111 1010 ____ - OP
+CMP     1101 0111 1011 ____ - OP
+-- Data Transfer
+MOV     1101 0111 1100 ____ - DEST AC
+MOV     1101 0111 1101 ____ - DEST DR
+LD      1101 0111 1110 ____ - [SRC]
+ST      1101 0111 1111 ____ - [DEST]
+-- Jump Instructions
+JMP     1110 0111 0000 ____ - [SRC]
+JE      1110 0111 0001 ____ - [SRC]
+JNE     1110 0111 0010 ____ - [SRC]
+JG      1110 0111 0011 ____ - [SRC]
+JGE     1110 0111 0100 ____ - [SRC]
+JL      1110 0111 0101 ____ - [SRC]
+JLE     1110 0111 0110 ____ - [SRC]
+-- In / Out
+IN      1110 0111 1000 ____ - [DEST]
+OUT     1110 0111 1001 ____ - [SRC]
+-- Data Transfer
+MOV     1110 0111 1010 ____ - AC SRC
+MOV     1110 0111 1011 ____ - DR SRC
+-- Halt
+HALT    1110 0111 0111 0000
+-- In / Out
+IN      1110 0111 0111 0001
+OUT     1110 0111 0111 0010
+-- Data Transfer
+MOV     1110 0111 0111 0011 - AC DR
+MOV     1110 0111 0111 0100 - DR AC

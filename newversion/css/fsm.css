@@ -1,0 +1,60 @@
+table mjx-container, p {
+    margin: 0 !important;
+}
+
+.tbl1-q td {
+    border: 1px solid black !important;
+    padding: 0 1rem;
+    font-style: italic;
+}
+
+.tbl1-q .trs, .tbl1-q td:first-child {
+    background-color: rgb(221,217,195);
+}
+
+.tbl1-q .diag {
+    display: grid;
+    width: max-content;
+    justify-content: space-between;
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: 1fr;
+    border-bottom: 0 !important;
+    border-right: 0 !important;
+    padding: 0;
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' preserveAspectRatio='none' viewBox='0 0 100 100' style='background-color: rgb(221,217,195)'><line x1='0' y1='0' x2='100' y2='100' stroke='black' vector-effect='non-scaling-stroke'/></svg>");
+    background-size: 100% 100%;
+}
+
+.diag-up {
+    grid-column-start: 2;
+    text-align: right;
+}
+
+.diag-bottom {
+    grid-column-start: 1;
+}
+
+.tbl2-q table.table-bordered {
+    border: 1px solid rgb(175, 175, 175) !important;
+    margin-bottom: 0 !important;
+}
+
+.tbl2-q table.table-bordered > tr > td {
+    border: 1px solid rgb(175, 175, 175) !important;
+}
+
+.tbl2-q table.ttable {
+    margin-bottom: 20px !important;
+}
+
+canvas {
+    width: unset !important;
+    height: unset !important;
+}
+
+.ttable th, .ttable td {
+    padding: 0 1.5rem;
+
+    user-select: none;
+    cursor: normal;
+}

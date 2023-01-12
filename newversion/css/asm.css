@@ -1,0 +1,85 @@
+.mem td.cell {
+    border: 1px solid rgb(119, 119, 119);
+
+    font-family: Consolas;
+    padding: 0.15rem 0.3rem;
+}
+
+.mem td.addr {
+    font-family: Consolas;
+    padding: 0.15rem 0.3rem;
+}
+
+.mem td.empty {
+    width: 2rem;
+}
+
+#code {
+    background-color: #1e1e1e;
+    color: #1e1e1e;
+    caret-color: white;
+
+    font-family: Consolas;
+    height: 20rem;
+    width: 30rem;
+
+    outline: none;
+    overflow: scroll;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    padding: 0.1rem 0.3rem;
+}
+
+.codecon {
+    position: relative;
+    width: 30rem;
+}
+
+.codeC {
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+
+    font-family: Consolas;
+    height: 7rem;
+    width: 20rem;
+}
+
+#codeOver {
+    font-family: Consolas;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 20rem;
+    width: 30rem;
+
+    overflow: scroll;
+
+    color: #d4d4d4;
+
+    pointer-events: none;
+
+    padding: 0.1rem 0.3rem;
+}
+
+#codeOver .keyword {
+    color: #568ca1;
+}
+
+#codeOver .regword {
+    color: #9cdcfe;
+}
+
+#codeOver .numword {
+    color: #b5cea8;
+}
+
+#codeOver .braword {
+    color: #da63a1;
+}
+
+#codeOver .lblword {
+    color: #c3915b;
+}

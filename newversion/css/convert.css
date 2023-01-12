@@ -1,0 +1,35 @@
+.redc {
+    border-radius: 50%;
+    border: 1px solid red;
+
+    padding: 0 0.4rem;
+}
+
+.d2c_row1::after {
+    content: '← Čitanje cifara';
+    color: red;
+}
+
+.d2c_row2::before {
+    content: 'Čitanje cifara →';
+    color: red;
+}
+
+.chunk {
+    position: relative;
+
+    padding: 0 0.2rem;
+
+    text-decoration: underline;
+    text-align: center;
+}
+
+.in-chunk {
+    position: absolute;
+
+    text-align: center;
+
+    width: 100%;
+    top: 100%;
+    left: 0%;
+}

@@ -1,0 +1,89 @@
+table.table-bordered {
+    border: 1px solid rgb(175, 175, 175) !important;
+    margin-bottom: 20px;
+}
+table.table-bordered > tr > th {
+    border: 1px solid rgb(175, 175, 175) !important;
+    width: 10%;
+}
+table.table-bordered > tr > td {
+    border: 1px solid rgb(175, 175, 175) !important;
+}
+
+.ttable th, .ttable td {
+    padding: 0 1.5rem;
+
+    user-select: none;
+    cursor: normal;
+}
+
+.ttable input {
+    width: 100%;
+}
+
+table.table-noborder {
+    border: 0 !important;
+    width: auto;
+    margin: 0 auto;
+    margin-bottom: 20px;
+    vertical-align: middle;
+}
+
+table.table-noborder > tr > th {
+    border: 0 !important;
+    width: 10%;
+}
+
+table.table-noborder > tr > td {
+    border: 0 !important;
+    width: 10%;
+}
+
+table mjx-container {
+    margin: 0 !important;
+}
+
+.map-table {
+    overflow: hidden;
+    table-layout: fixed;
+}
+
+.map-table td {
+    font-size: 1.2rem;
+    padding: 0.2rem 0.5rem;
+    position: relative;
+}
+
+.map-table td.over {
+    z-index: 100;
+    background: white;
+    border: 1px solid rgb(175, 175, 175) !important;
+    background-clip: padding-box;
+}
+
+.map-table .circ {
+    border: 1px solid red;
+    position: absolute;
+    border-radius: 0.3em;
+    top: 5%;
+    left: 5%;
+}
+
+canvas {
+    width: unset !important;
+    height: unset !important;
+}
+
+.canvas-con {
+    width: fit-content !important;
+    height: fit-content !important;
+
+    position: relative;
+}
+
+.canvas-con > p {
+    position: absolute;
+    line-height: unset !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
