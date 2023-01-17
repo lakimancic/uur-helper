@@ -215,9 +215,7 @@ class Register {
 }
 
 class Assembler {
-    constructor(text) {
-        this.text = text;
-
+    constructor() {
         this.ints = [
             this.add3, this.sub3, this.and3, this.or3, this.xor3, this.mul3, this.div3, this.cmp3, this.ld3, this.mov3im, this.st3,
             this.add2, this.sub2, this.or2, this.xor2, this.mul2, this.div2, this.shr2, this.ror2, this.not2, this.neg2, this.cmp2,
@@ -230,18 +228,40 @@ class Assembler {
         ];
 
         this.memory = new Memory(8, 256);
+        this.memToLine = {};
         this.memoryPointer = 0;
 
         this.labels = {};
     }
 
+    assemble(text) {
+        this.memory.reset();
+        this.labels = {};
+
+        this.text = text;
+
+        this.parse();
+    }
+
     parse() {
-        const lines = this.text.split('\n');
+        const lines = this.text.split('\n').map(i => i.trim());
+        this.memToLine = {};
         this.memoryPointer = 0;
 
-        lines.forEach(line => {
-            for(let i=0;i<this.ints.length;i++) {
-                if(this.ints[i](line)) break;
+        lines.forEach((line, lind) => {
+            line = line.replace(/;(.+)?$/, '');
+            if(line != '') {
+                let intFnd = false;
+                this.lineInd = lind;
+                for(let i=0;i<this.ints.length;i++) {
+                    if(this.ints[i](line)) {
+                        intFnd = true;
+                        break;
+                    }
+                }
+                if(!intFnd) {
+                    throw `Greška u liniji ${this.lineInd+1}: Neispravna sintaksa`;
+                }
             }
         });
     }
@@ -257,6 +277,7 @@ class Assembler {
             const strInt = `${code}${utils.toBin(parseInt(params[1], 16), 4)}${utils.toBin(parseInt(params[2], 16), 4)}${utils.toBin(parseInt(params[3], 16), 4)}`;
             this.memory.setValue(this.memoryPointer, parseInt(strInt.slice(0, 8), 2));
             this.memory.setValue(this.memoryPointer + 1, parseInt(strInt.slice(8), 2));
+            this.memToLine[this.memoryPointer] = this.lineInd;
             this.incrementPointer(2);
             return true;
         }
@@ -267,10 +288,13 @@ class Assembler {
         let params;
         if(params = regx.exec(str)) {
             let num3 = Number(params[2]);
-            if(num3 >= 256) return false;
+            if(num3 >= 256) {
+                throw `Greška u liniji ${this.lineInd+1}: Vrednost ili adresa mora biti u opsegu [0, 255]`;
+            }
             const strInt = `${code}${utils.toBin(parseInt(params[1], 16), 4)}${utils.toBin(num3, 8)}`;
             this.memory.setValue(this.memoryPointer, parseInt(strInt.slice(0, 8), 2));
             this.memory.setValue(this.memoryPointer + 1, parseInt(strInt.slice(8), 2));
+            this.memToLine[this.memoryPointer] = this.lineInd;
             this.incrementPointer(2);
             return true;
         }
@@ -297,6 +321,7 @@ class Assembler {
             const strInt = `${code}${utils.toBin(parseInt(params[1], 16), 4)}${utils.toBin(parseInt(params[2], 16), 4)}`;
             this.memory.setValue(this.memoryPointer, parseInt(strInt.slice(0, 8), 2));
             this.memory.setValue(this.memoryPointer + 1, parseInt(strInt.slice(8), 2));
+            this.memToLine[this.memoryPointer] = this.lineInd;
             this.incrementPointer(2);
             return true;
         }
@@ -307,10 +332,13 @@ class Assembler {
         let params;
         if(params = regx.exec(str)) {
             let num3 = Number(params[2]);
-            if(num3 >= 16) return false;
+            if(num3 >= 16) {
+                throw `Greška u liniji ${this.lineInd+1}: Broj mora biti u opsegu [0, 15]`;
+            }
             const strInt = `${code}${utils.toBin(parseInt(params[1], 16), 4)}${utils.toBin(num3, 4)}`;
             this.memory.setValue(this.memoryPointer, parseInt(strInt.slice(0, 8), 2));
             this.memory.setValue(this.memoryPointer + 1, parseInt(strInt.slice(8), 2));
+            this.memToLine[this.memoryPointer] = this.lineInd;
             this.incrementPointer(2);
             return true;
         }
@@ -321,10 +349,13 @@ class Assembler {
         let params;
         if(params = regx.exec(str)) {
             let num3 = Number(params[1]);
-            if(num3 >= 256) return false;
+            if(num3 >= 256) {
+                throw `Greška u liniji ${this.lineInd+1}: Vrednost ili adresa mora biti u opsegu [0, 255]`;
+            }
             const strInt = `${code}${utils.toBin(num3, 8)}`;
             this.memory.setValue(this.memoryPointer, parseInt(strInt.slice(0, 8), 2));
             this.memory.setValue(this.memoryPointer + 1, parseInt(strInt.slice(8), 2));
+            this.memToLine[this.memoryPointer] = this.lineInd;
             this.incrementPointer(2);
             return true;
         }
@@ -377,6 +408,7 @@ class Assembler {
             const strInt = `${code}${utils.toBin(parseInt(params[1], 16), 4)}`;
             this.memory.setValue(this.memoryPointer, parseInt(strInt.slice(0, 8), 2));
             this.memory.setValue(this.memoryPointer + 1, parseInt(strInt.slice(8), 2));
+            this.memToLine[this.memoryPointer] = this.lineInd;
             this.incrementPointer(2);
             return true;
         }
@@ -387,10 +419,13 @@ class Assembler {
         let params;
         if(params = regx.exec(str)) {
             let num3 = Number(params[1]);
-            if(num3 >= 16) return false;
+            if(num3 >= 16) {
+                throw `Greška u liniji ${this.lineInd+1}: Broj mora biti u opsegu [0, 15]`;
+            }
             const strInt = `${code}${utils.toBin(num3, 4)}`;
             this.memory.setValue(this.memoryPointer, parseInt(strInt.slice(0, 8), 2));
             this.memory.setValue(this.memoryPointer + 1, parseInt(strInt.slice(8), 2));
+            this.memToLine[this.memoryPointer] = this.lineInd;
             this.incrementPointer(2);
             return true;
         }
@@ -436,6 +471,7 @@ class Assembler {
             const strInt = `${code}`;
             this.memory.setValue(this.memoryPointer, parseInt(strInt.slice(0, 8), 2));
             this.memory.setValue(this.memoryPointer + 1, parseInt(strInt.slice(8), 2));
+            this.memToLine[this.memoryPointer] = this.lineInd;
             this.incrementPointer(2);
             return true;
         }
@@ -467,10 +503,13 @@ class Assembler {
         let params;
         if(params = regx.exec(str)) {
             let lbl = params[2];
-            if(!this.labels[lbl]) return false;
+            if(this.labels[lbl] == undefined) {
+                throw `Greška u liniji ${this.lineInd+1}: Neispravna labela`;
+            }
             const strInt = `${code}${utils.toBin(parseInt(params[1], 16), 4)}${utils.toBin(this.labels[lbl], 8)}`;
             this.memory.setValue(this.memoryPointer, parseInt(strInt.slice(0, 8), 2));
             this.memory.setValue(this.memoryPointer + 1, parseInt(strInt.slice(8), 2));
+            this.memToLine[this.memoryPointer] = this.lineInd;
             this.incrementPointer(2);
             return true;
         }
@@ -485,10 +524,14 @@ class Assembler {
         let params;
         if(params = regx.exec(str)) {
             let lbl = params[1];
-            if(!this.labels[lbl]) return false;
-            const strInt = `${code}${utils.toBin(parseInt(params[1], 16), 4)}${utils.toBin(this.labels[lbl], 8)}`;
+            console.log(lbl);
+            if(this.labels[lbl] == undefined) {
+                throw `Greška u liniji ${this.lineInd+1}: Neispravna labela`;
+            }
+            const strInt = `${code}${utils.toBin(this.labels[lbl], 8)}`;
             this.memory.setValue(this.memoryPointer, parseInt(strInt.slice(0, 8), 2));
             this.memory.setValue(this.memoryPointer + 1, parseInt(strInt.slice(8), 2));
+            this.memToLine[this.memoryPointer] = this.lineInd;
             this.incrementPointer(2);
             return true;
         }
@@ -520,6 +563,14 @@ class Memory {
         }
     }
 
+    reset() {
+        this.memory = [];
+
+        for(let i=0;i<this.memSize;i++) {
+            this.memory.push(0);
+        }
+    }
+
     setValue(addr, value) {
         this.memory[addr] = value;
     }
@@ -542,6 +593,10 @@ class SimpleRegister {
     constructor(size) {
         this.value = 0;
         this.size = size;
+    }
+
+    reset() {
+        this.value = 0;
     }
 
     setBit(bit, value) {
@@ -585,6 +640,20 @@ class CPU {
         this.outputBuffer = [];
     }
 
+    reset() {
+        for(let i=0;i<16;i++) this.regs[i].reset();
+
+        this.ac.reset();
+        this.dr.reset();
+        this.ar.reset();
+        this.pc.reset();
+        this.ir.reset();
+        this.sr.reset();
+
+        this.outputBuffer = [];
+        this.isFinished = false;
+    }
+
     increment() {
         this.pc.value += 2;
         this.pc.value %= this.memory.memSize;
@@ -604,9 +673,12 @@ class CPU {
     }
 
     executeInstruction() {
-        this.getInstruction();
-        this.increment();
-        this.decode();
+        if(!this.isFinished) {
+            this.getInstruction();
+            this.increment();
+            return this.decode();
+        }
+        return true;
     }
 
     decode() {
@@ -624,6 +696,8 @@ class CPU {
             case 0b1010: return this.mov3();
             case 0b1011: return this.st3();
             case 0b1100: return this.decode1100();
+            case 0b1101: return this.decode1101();
+            case 0b1110: return this.decode1110();
         }
         return false;
     }
@@ -655,7 +729,7 @@ class CPU {
     or3() {
         const reg0 = (this.ir.value >> 8) & 0b1111;
         const reg1 = (this.ir.value >> 4) & 0b1111;
-        const reg2 = (this.ir.value) | 0b1111;
+        const reg2 = (this.ir.value) & 0b1111;
         this.regs[reg0].value = this.regs[reg1].value & this.regs[reg2].value;
         return true;
     }
@@ -663,7 +737,7 @@ class CPU {
     xor3() {
         const reg0 = (this.ir.value >> 8) & 0b1111;
         const reg1 = (this.ir.value >> 4) & 0b1111;
-        const reg2 = (this.ir.value) | 0b1111;
+        const reg2 = (this.ir.value) & 0b1111;
         this.regs[reg0].value = this.regs[reg1].value ^ this.regs[reg2].value;
         return true;
     }
@@ -671,7 +745,7 @@ class CPU {
     mul3() {
         const reg0 = (this.ir.value >> 8) & 0b1111;
         const reg1 = (this.ir.value >> 4) & 0b1111;
-        const reg2 = (this.ir.value) | 0b1111;
+        const reg2 = (this.ir.value) & 0b1111;
         this.regs[reg0].value = (this.regs[reg1].value * this.regs[reg2].value) & (this.REG_LIMIT - 1);
         return true;
     }
@@ -679,7 +753,7 @@ class CPU {
     div3() {
         const reg0 = (this.ir.value >> 8) & 0b1111;
         const reg1 = (this.ir.value >> 4) & 0b1111;
-        const reg2 = (this.ir.value) | 0b1111;
+        const reg2 = (this.ir.value) & 0b1111;
         if(this.regs[reg2].value == 0) this.regs[reg0].value = this.REG_LIMIT - 1;
         else this.regs[reg0].value = Math.floor(this.regs[reg1].value / this.regs[reg2].value) & (this.REG_LIMIT - 1);
         return true;
@@ -690,7 +764,7 @@ class CPU {
         const imm = (this.ir.value) & 0b11111111;
         const val = this.regs[reg0].value + this.REG_LIMIT - imm;
         this.sr.setBit(1, (val >> 7) & 1);
-        this.sr.setBit(0, (val & (this.REG_LIMIT - 1) == 0 ? 1 : 0));
+        this.sr.setBit(0, (val & (this.REG_LIMIT - 1)) == 0 ? 1 : 0);
         return true;
     }
 
@@ -823,7 +897,7 @@ class CPU {
         const reg2 = (this.ir.value) & 0b1111;
         const val = this.regs[reg1].value + this.REG_LIMIT - this.regs[reg2].value;
         this.sr.setBit(1, (val >> 7) & 1);
-        this.sr.setBit(0, ((val & (this.REG_LIMIT - 1)) == 0 ? 1 : 0));
+        this.sr.setBit(0, (val & (this.REG_LIMIT - 1)) == 0 ? 1 : 0);
         return true;
     }
 
@@ -924,7 +998,7 @@ class CPU {
             case 0b0100: return this.jge2();
             case 0b0101: return this.jl2();
             case 0b0110: return this.jle2();
-
+            case 0b0111: return this.decode1110_0111();
             case 0b1000: return this.st2im();
             case 0b1001: return this.ld2im();
             case 0b1010: return this.movac2();
@@ -1002,22 +1076,22 @@ class CPU {
     decode1101_0111() {
         const next4 = (this.ir.value >> 4) & 0b1111;
         switch(next4) {
-            case 0b0000: this.add1();
-            case 0b0001: this.sub1();
-            case 0b0010: this.and1();
-            case 0b0011: this.or1();
-            case 0b0100: this.xor1();
-            case 0b0101: this.mul1();
-            case 0b0110: this.div1();
-            case 0b0111: this.shr1();
-            case 0b1000: this.ror1();
-            case 0b1001: this.not1();
-            case 0b1010: this.neg1();
-            case 0b1011: this.cmp1();
-            case 0b1100: this.mov1ac();
-            case 0b1101: this.mov1dr();
-            case 0b1110: this.ld1();
-            case 0b1111: this.st1();
+            case 0b0000: return this.add1();
+            case 0b0001: return this.sub1();
+            case 0b0010: return this.and1();
+            case 0b0011: return this.or1();
+            case 0b0100: return this.xor1();
+            case 0b0101: return this.mul1();
+            case 0b0110: return this.div1();
+            case 0b0111: return this.shr1();
+            case 0b1000: return this.ror1();
+            case 0b1001: return this.not1();
+            case 0b1010: return this.neg1();
+            case 0b1011: return this.cmp1();
+            case 0b1100: return this.mov1ac();
+            case 0b1101: return this.mov1dr();
+            case 0b1110: return this.ld1();
+            case 0b1111: return this.st1();
         }
         return false;
     }
@@ -1187,12 +1261,15 @@ class CPU {
     in1() {
         const reg2 = (this.ir.value) & 0b1111;
         if(this.inputPointer < this.input.length) this.regs[reg2].value = this.input.charCodeAt(this.inputPointer);
+        else this.regs[reg2].value = 0;
         this.inputPointer++;
+        return true;
     }
 
     out1() {
         const reg2 = (this.ir.value) & 0b1111;
         this.outputBuffer.push(this.regs[reg2].value);
+        return true;
     }
 
     movac1() {
@@ -1208,9 +1285,42 @@ class CPU {
     }
 
     decode1110_0111_0111() {
-        const next4 = (this.ir.value >> 4) & 0b1111;
+        const next4 = (this.ir.value) & 0b1111;
         switch(next4) {
+            case 0b0000: return this.halt0();
+            case 0b0001: return this.in0();
+            case 0b0010: return this.out0();
+            case 0b0011: return this.mov0_1();
+            case 0b0100: return this.mov0_2();
         }
+        return false;
+    }
+
+    halt0() {
+        this.isFinished = true;
+        return true;
+    }
+
+    in0() {
+        if(this.inputPointer < this.input.length) this.dr.value = this.input.charCodeAt(this.inputPointer);
+        else this.dr.value = 0;
+        this.inputPointer++;
+        return true;
+    }
+
+    out0() {
+        this.outputBuffer.push(this.dr.value);
+        return true;
+    }
+
+    mov0_1() {
+        this.ac.value = this.dr.value;
+        return true;
+    }
+    
+    mov0_2() {
+        this.dr.value = this.ac.value;
+        return true;
     }
 }
 

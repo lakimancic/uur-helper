@@ -182,6 +182,10 @@ class BoolFunction {
     }
 
     getPDNF() {
+        if(this.truthValues.some(i => i == '*')) {
+            return $(`<p>\\[\\text{Funkcija nije potpuno definisana}\\]</p>`);
+        }
+
         let pdnfText = `f(${Array.from(Array(this.varsNum).keys()).map(i => `x_${i+1}`).join(',')}) =`;
 
         const filteredTT = this.truthValues
@@ -208,6 +212,10 @@ class BoolFunction {
     }
 
     getPKNF() {
+        if(this.truthValues.some(i => i == '*')) {
+            return $(`<p>\\[\\text{Funkcija nije potpuno definisana}\\]</p>`);
+        }
+
         let pknfText = `f(${Array.from(Array(this.varsNum).keys()).map(i => `x_${i+1}`).join(',')}) =`;
 
         const filteredTT = this.truthValues
@@ -235,6 +243,10 @@ class BoolFunction {
     }
 
     getPPNF() {
+        if(this.truthValues.some(i => i == '*')) {
+            return $(`<p>\\[\\text{Funkcija nije potpuno definisana}\\]</p>`);
+        }
+
         let ppnfText = `f(${Array.from(Array(this.varsNum).keys()).map(i => `x_${i+1}`).join(',')}) =`;
 
         const filteredTT = this.truthValues
@@ -261,6 +273,10 @@ class BoolFunction {
     }
 
     getKP() {
+        if(this.truthValues.some(i => i == '*')) {
+            return $(`<p>\\[\\text{Funkcija nije potpuno definisana}\\]</p>`);
+        }
+        
         let kpText = `f(${Array.from(Array(this.varsNum).keys()).map(i => `x_${i+1}`).join(',')}) =`;
         let resVars = [];
         this.truthValues

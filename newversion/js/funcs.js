@@ -175,16 +175,21 @@ const solve = () => {
 
     $(".res-q").append($(`<h4 class="text-center p-4">Logičko kolo - NI kola</h4>`));
     $(".res-q").append($(`<h5 class="text-center p-4">Višeulazna logička kola</h5>`));
+    $(".res-q").append($(`<div class="func-con"></div>`).append(func.getNandMinimalDNF()));
     $(".res-q").append(getCanvasNandDNF());
     $(".res-q").append($(`<h5 class="text-center p-4">Dvoulazna logička kola</h5>`));
+    $(".res-q").append($(`<div class="func-con"></div>`).append(func.getNandMinimalDNF2()));
     $(".res-q").append(getCanvasNandDNF2());
 
     $(".res-q").append($(`<h4 class="text-center p-4">Logičko kolo - NILI kola</h4>`));
     $(".res-q").append($(`<h5 class="text-center p-4">Višeulazna logička kola</h5>`));
+    $(".res-q").append($(`<div class="func-con"></div>`).append(func.getNorMinimalKNF()));
     $(".res-q").append(getCanvasNorKNF());
     $(".res-q").append($(`<h5 class="text-center p-4">Dvoulazna logička kola</h5>`));
+    $(".res-q").append($(`<div class="func-con"></div>`).append(func.getNorMinimalKNF2()));
     $(".res-q").append(getCanvasNorKNF2());
     $(".res-q").append($(`<h5 class="text-center p-4">Dvoulazna logička kola (preko DNF)</h5>`));
+    $(".res-q").append($(`<div class="func-con"></div>`).append(func.getNorMinimalDNF2()));
     $(".res-q").append(getCanvasNorDNF2());
 
     MathJax.typeset();

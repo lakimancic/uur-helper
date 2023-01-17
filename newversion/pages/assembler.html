@@ -16,6 +16,8 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" id="MathJax-script" async defer></script>
     <!-- FONTAWESOME -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"/>
+    <!-- ACE -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.14.0/ace.js" defer></script>
     <!-- SCRIPTS -->
     <script type="module" src="../js/asm.js" defer></script>
     <!-- STYLES -->
@@ -45,25 +47,26 @@
             <div class="my-3 text-center">
                 <button class="btn btn-primary px-3" id="assemble">Asembluj<i class="fa-solid fa-gears" style="padding-left: 0.3rem;"></i></button>
                 <!-- <button class="btn btn-primary px-3" id="disassemble">Disasembluj<i class="fa-solid fa-screwdriver-wrench" style="padding-left: 0.3rem;"></i></button> -->
-                <button class="btn btn-success px-3" id="start">Pokreni<i class="fa-solid fa-play" style="padding-left: 0.3rem;"></i></button>
-                <button class="btn btn-danger px-3" id="stop">Zaustavi<i class="fa-solid fa-stop" style="padding-left: 0.3rem;"></i></button>
-                <button class="btn btn-primary px-3" id="reset">Resetuj<i class="fa-solid fa-arrow-rotate-right" style="padding-left: 0.3rem;"></i></button>
-                <button class="btn btn-primary px-3" id="step1">Izvrši 1<i class="fa-solid fa-forward-step" style="padding-left: 0.3rem;"></i></button>
+                <button class="btn btn-success px-3" id="start" disabled>Pokreni<i class="fa-solid fa-play" style="padding-left: 0.3rem;"></i></button>
+                <button class="btn btn-danger px-3" id="stop" disabled>Zaustavi<i class="fa-solid fa-stop" style="padding-left: 0.3rem;"></i></button>
+                <!-- <button class="btn btn-primary px-3" id="reset">Resetuj<i class="fa-solid fa-arrow-rotate-right" style="padding-left: 0.3rem;"></i></button> -->
+                <button class="btn btn-primary px-3" id="step1" disabled>Korak<i class="fa-solid fa-forward-step" style="padding-left: 0.3rem;"></i></button>
+            </div>
+            <div class="input-group my-3 mx-auto" style="width: 50%;">
+                <label for="runSpeed" class="form-label mx-auto">Brzina izvršavanja instrukcija</label>
+                <input type="range" class="form-range" min="10" max="1000" step="10" id="runSpeed">
             </div>
         </div>
         <div class="row">
             <div class="col-md-7">
                 <h4 class="text-center p-4">Asemblerski kod</h4>
-                <div class="codecon mx-auto">
-                    <div id="code" contenteditable spellcheck="false"></div>
-                    <div id="codeOver"></div>
-                </div>
+                <pre id="editor" class="mx-auto"></pre>
             </div>
             <div class="col-md-5">
                 <h4 class="text-center p-4">Ulaz</h4>
-                <div id="inputBuff" class="codeC"></div>
+                <pre id="edit_in" class="mx-auto"></pre>
                 <h4 class="text-center p-4">Izlaz</h4>
-                <div id="outputBuff" class="codeC"></div>
+                <pre id="edit_out" class="mx-auto"></pre>
             </div>
         </div>
     </div>

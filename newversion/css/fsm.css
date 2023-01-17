@@ -2,17 +2,32 @@ table mjx-container, p {
     margin: 0 !important;
 }
 
-.tbl1-q td {
+.tbl1-q td, .tables-q-con td {
     border: 1px solid black !important;
     padding: 0 1rem;
     font-style: italic;
 }
 
-.tbl1-q .trs, .tbl1-q td:first-child {
+.tbl1-q .trs, .tbl1-q td:first-child, .tables-q-con .trs, .tables-q-con td:first-child {
     background-color: rgb(221,217,195);
 }
 
-.tbl1-q .diag {
+.tables-q-con td {
+    padding: 0;
+}
+
+.tables-q-con td input {
+    width: 3rem;
+    height: 100%;
+    margin: 0 0.2rem;
+
+    outline: none;
+    border: 0;
+
+    background-color: transparent;
+}
+
+.tbl1-q .diag, .tables-q-con .diag {
     display: grid;
     width: max-content;
     justify-content: space-between;
@@ -57,4 +72,48 @@ canvas {
 
     user-select: none;
     cursor: normal;
+}
+
+.mat-inputs {
+    position: relative;
+    margin: 1rem auto;
+
+    width: fit-content;
+}
+
+.mat-inputs::before {
+    position: absolute;
+    content: '';
+
+    width: 0.3rem;
+    left: -0.5rem;
+    height: 100%;
+    top: -2px;
+
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+    border-left: 2px solid black;
+}
+
+.mat-inputs::after {
+    position: absolute;
+    content: '';
+
+    width: 0.3rem;
+    right: -0.5rem;
+    height: 100%;
+    top: -2px;
+
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+    border-right: 2px solid black;
+}
+
+.mat-row input {
+    width: 4rem;
+    background-color: rgb(243, 243, 243);
+    border: 0;
+    outline: none;
+
+    margin: 0.5rem;
 }

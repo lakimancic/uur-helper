@@ -5,7 +5,41 @@ const DIST = 200;
 
 class FSM {
     constructor() {
-        this.states = [];
+        this.states = [
+            {
+                "name": "1/x",
+                "nodes": {
+                    "0": [
+                        "a"
+                    ],
+                    "1": [
+                        "b"
+                    ]
+                }
+            },
+            {
+                "name": "2/y",
+                "nodes": {
+                    "1": [
+                        "a"
+                    ],
+                    "2": [
+                        "b"
+                    ]
+                }
+            },
+            {
+                "name": "3/z",
+                "nodes": {
+                    "0": [
+                        "b"
+                    ],
+                    "2": [
+                        "a"
+                    ]
+                }
+            }
+        ];
         this.actions = [];
 
         this.ox = 300;
@@ -206,7 +240,7 @@ class FSM {
         ctx.stroke();
     }
 
-    solve() {
+    solve(canvas = null) {
         if(this.states.length < 2) {
             Swal.fire({
                 icon: 'error',
@@ -223,6 +257,7 @@ class FSM {
             });
             return;
         }
+        if(canvas != null) this.render(canvas);
         this.solveType();
         this.solveTables();
         this.solveMatrices();
@@ -663,4 +698,152 @@ $("#undoAct").on('click', () => {
         }
         fsm.render($("#graph")[0]);
     }
+});
+
+$("#next").click(() => {
+    $('.main-q').toggleClass('d-none');
+    if($('#rb-graph')[0].checked) {
+        $('.graph-q-con').toggleClass('d-none');
+    }
+    else if($('#rb-tables')[0].checked) {
+        $('.tables-q-con').toggleClass('d-none');
+    }
+    else if($('#rb-mats')[0].checked) {
+        $('.mats-q-con').toggleClass('d-none');
+    }
+});
+
+$("#create1").click(() => {
+    let qsize = $("#states1").val();
+    let isize = $("#inputs1").val();
+
+    qsize = Number(qsize);
+    isize = Number(isize);
+
+    let text1 = `
+    <tr class="trs">
+        <td class="diag">
+            <div class="diag-up">q(t)</div>
+            <div class="diag-bottom">a</div>
+        </td>
+        ${Array.from(Array(qsize)).map(_ => `<td><input type='text'/></td>`).join('')}
+    </tr>
+    ${Array.from(Array(isize)).map(_ => `
+    <tr>
+    ${Array.from(Array(qsize+1)).map(_ => `<td><input type='text'/></td>`).join('')}
+    </tr>`).join('')}`;
+    $(".tables-q-con")[0].querySelectorAll('.col-sm')[0].innerHTML = ``;
+    $(".tables-q-con")[0].querySelectorAll('.col-sm')[0].appendChild($(`<table class='text-center mx-auto my-4'>${text1}</table>`)[0]);
+
+    $("#analyze2").removeClass('d-none');
+});
+
+const getFromTables = () => {
+    let qsize = $("#states1").val();
+    let isize = $("#inputs1").val();
+
+    qsize = Number(qsize);
+    isize = Number(isize);
+
+    const inputs =  $(".tables-q-con table input");
+
+    let Qs = [], As = [];
+
+    for(let i=0;i<qsize;i++) {
+        Qs.push(inputs[i].value);
+    }
+
+    for(let i=0;i<isize;i++) {
+        let temp = [];
+        for(let j=0;j<=qsize;j++) {
+            temp.push(inputs[qsize + i*(qsize + 1) + j].value);
+        }
+        As.push(temp);
+    }
+
+    if(Qs.some(i => i.includes('/')) && !Qs.every(i => i.includes('/'))) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Greška',
+            text: 'Neispravno unet automat!'
+        });
+        return false;
+    }
+    else if(As.some(i => i.slice(1).some(j => j.includes('/'))) && !As.every(i => i.slice(1).every(j => j.includes('/')))) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Greška',
+            text: 'Neispravno unet automat!'
+        });
+        return false;
+    }
+
+    let forRet = true;
+    fsm.states = Qs.map((i, ind) => {
+        let obj = {
+            name: i,
+            nodes: {}
+        };
+        As.forEach(arr => {
+            let qind = Qs.findIndex(j => j.split('/')[0] == arr[ind+1].split('/')[0]);
+            if(forRet && qind == -1) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Greška',
+                    text: 'Neispravno unet automat!'
+                });
+                forRet = false;
+            }
+            let nodesArr = obj.nodes[qind];
+            if(!nodesArr) {
+                obj.nodes[Qs.findIndex(j => j.split('/')[0] == arr[ind+1].split('/')[0])] = [arr[0] + (arr[ind+1].split('/').length > 1 ? '/' + arr[ind+1].split('/')[1] : '')];
+            }
+            else {
+                obj.nodes[Qs.findIndex(j => j.split('/')[0] == arr[ind+1].split('/')[0])].push(arr[0] + (arr[ind+1].split('/').length > 1 ? '/' + arr[ind+1].split('/')[1] : ''));
+            }
+        });
+        return obj;
+    });
+
+    return forRet;
+};
+
+$("#analyze2").click(() => {
+    if(!getFromTables()) return;
+    $("#graph2").parent().toggleClass('d-none');
+    fsm.solve($("#graph2")[0]);
+});
+
+$("#create2").click(() => {
+    let qsize = $("#states2").val();
+
+    qsize = Number(qsize);
+
+    $(".mats-q-con .col-sm").html('');
+    $(".mats-q-con .col-sm").append($(`<div class="mat-inputs">${Array.from(Array(qsize)).map(_ => `<div class="mat-row">${Array.from(Array(qsize)).map(_ => `<input type="text"/>`).join('')}</div>`).join('')}</div>`));
+
+    $("#analyze3").removeClass('d-none');
+});
+
+const getFromMat = () => {
+    let qsize = Number($("#states2").val());
+    let mat = $(".mats-q-con .col-sm input");
+
+    fsm.states = Array.from(Array(qsize).keys()).map(i => {
+        let obj = { name: String(i+1), nodes: {} };
+
+        Array.from(Array(qsize).keys()).forEach(j => {
+            if(mat[i*qsize + j].value != '') obj.nodes[j] = mat[i*qsize + j].value.split('+');
+        });
+
+        return obj;
+    });
+
+    console.log(fsm.states);
+};
+
+$("#analyze3").click(() => {
+    getFromMat();
+    $("#graph2").parent().toggleClass('d-none');
+    fsm.solve($("#graph2")[0]);
 });

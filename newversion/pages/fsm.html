@@ -29,18 +29,65 @@
     </div>
     <!-- CONTENT -->
     <div class="container mt-5">
-        <div class="row graph-q">
+        <div class="row main-q">
+            <h4 class="text-center p-4">U kom formatu je dat automat:</h4>
+            <div class="input-group mb-3 d-flex justify-content-center">
+                <label class="form-check-label">
+                    <input type="radio" class="form-check-input me-2" id="rb-graph" name="format" checked>U vidu grafa
+                </label>
+                <label class="form-check-label mx-3">
+                    <input type="radio" class="form-check-input me-2" id="rb-tables" name="format">U vidu tablice prelaza / izlaza
+                </label>
+                <label class="form-check-label mx-3">
+                    <input type="radio" class="form-check-input me-2" id="rb-mats" name="format">U vidu matrice prelaza / izlaza
+                </label>
+            </div>
+            <div class="input-group mb-3 text-center">
+                <button class="btn btn-success px-3 m-auto" id="next">Dalje</button>
+            </div>
+        </div>
+        <div class="graph-q-con d-none">
+            <div class="row graph-q">
+                <h4 class="text-center p-4">Graf</h4>
+                <div class="mb-3 text-center">
+                    <button class="btn btn-primary px-3" id="addState"><span class="px-2">Dodaj stanje</span><i class="fa-regular fa-circle"></i></button>
+                    <button class="btn btn-primary px-3" id="addConn"><span class="px-2">Dodaj prelaz</span><i class="fa-solid fa-turn-down"></i></button>
+                    <button class="btn btn-secondary px-3" id="undoAct"><span class="px-2">Undo</span><i class="fa-solid fa-rotate-left"></i></button>
+                    <button class="btn btn-danger px-3" id="clearAll"><span class="px-2">Izbriši sve</span><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+                <canvas id="graph" class="mx-auto"></canvas>
+                <div class="mb-3 text-center">
+                    <button class="btn btn-success px-3" id="analyze"><span class="px-2">Analiziraj</span></button>
+                </div>
+            </div>
+        </div>
+        <div class="row d-none tables-q-con">
+            <h4 class="text-center p-4">Tablica prelaza / izlaza</h4>
+            <div class="input-group mb-3">
+                <input class="form-control" type="text" id="states1" placeholder="Broj stanja">
+                <input class="form-control" type="text" id="inputs1" placeholder="Broj ulaza">
+                <button class="btn btn-success px-3 m-auto" id="create1">Kreiraj tablicu</button>
+            </div>
+            <div class="col-sm"></div>
+            <div class="mb-3 text-center">
+                <button class="btn btn-success px-3 d-none" id="analyze2"><span class="px-2">Analiziraj</span></button>
+            </div>
+        </div>
+        <div class="row d-none mats-q-con">
+            <h4 class="text-center p-4">Matrica prelaza / izlaza</h4>
+            <div class="input-group mb-3">
+                <input class="form-control" type="text" id="states2" placeholder="Broj stanja">
+                <button class="btn btn-success px-3 m-auto" id="create2">Kreiraj matricu</button>
+            </div>
+            <div class="col-sm">
+            </div>
+            <div class="mb-3 text-center">
+                <button class="btn btn-success px-3 d-none" id="analyze3"><span class="px-2">Analiziraj</span></button>
+            </div>
+        </div>
+        <div class="row d-none grph-q">
             <h4 class="text-center p-4">Graf</h4>
-            <div class="mb-3 text-center">
-                <button class="btn btn-primary px-3" id="addState"><span class="px-2">Dodaj stanje</span><i class="fa-regular fa-circle"></i></button>
-                <button class="btn btn-primary px-3" id="addConn"><span class="px-2">Dodaj prelaz</span><i class="fa-solid fa-turn-down"></i></button>
-                <button class="btn btn-secondary px-3" id="undoAct"><span class="px-2">Undo</span><i class="fa-solid fa-rotate-left"></i></button>
-                <button class="btn btn-danger px-3" id="clearAll"><span class="px-2">Izbriši sve</span><i class="fa-solid fa-trash-can"></i></button>
-            </div>
-            <canvas id="graph" class="mx-auto"></canvas>
-            <div class="mb-3 text-center">
-                <button class="btn btn-success px-3" id="analyze"><span class="px-2">Analiziraj</span></button>
-            </div>
+            <canvas id="graph2" class="mx-auto"></canvas>
         </div>
         <div class="row d-none type-q">
             <h4 class="text-center p-4">Tip automata</h4>
@@ -65,7 +112,6 @@
             </div>
             <div class="col-sm-4"></div>
             <div class="col-sm-4"></div>
-            
         </div>
         <div class="row d-none paths-q">
             <h4 class="text-center p-4">Putevi u automatu</h4>

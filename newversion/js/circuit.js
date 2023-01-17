@@ -932,6 +932,55 @@ class FunctionCircuit extends MinimizedFunction {
         };
     }
 
+    getNandMinimalDNF() {
+        const res = [];
+
+        let mdnf = `f(${Array.from(Array(this.varsNum).keys()).map(i => `x_${i+1}`).join(',')}) =`;
+        mdnf += this.mdnf.map(im => {
+            return im.map(i => {
+                if(i.comp) return `\\overline{${i.name[0]}_{${i.name.slice(1)}}}`;
+                else return `${i.name[0]}_{${i.name.slice(1)}}`;
+            }).join('\\cdot ');
+        }).join('+');
+
+        if(this.mdnf.length != 1 || this.mdnf[0].length != 1) {
+            mdnf += ' = ';
+            res.push($(`<p>\\[${mdnf}\\]</p>`));
+
+            mdnf = ` = \\overline{\\overline{${this.mdnf.map(im => {
+                return im.map(i => {
+                    if(i.comp) return `\\overline{${i.name[0]}_{${i.name.slice(1)}}}`;
+                    else return `${i.name[0]}_{${i.name.slice(1)}}`;
+                }).join('\\cdot ');
+            }).join('+')}}}`;
+            
+            if(this.mdnf.length > 1) {
+                mdnf += ' = ';
+                res.push($(`<p>\\[${mdnf}\\]</p>`));
+
+                mdnf = ` = \\overline{${this.mdnf.map(im => {
+                    if(im.length > 1) return `\\overline{${im.map(i => {
+                        if(i.comp) return `\\overline{${i.name[0]}_{${i.name.slice(1)}}}`;
+                        else return `${i.name[0]}_{${i.name.slice(1)}}`;
+                    }).join('\\cdot ')}}`;
+                    else return im.map(i => {
+                        if(i.comp) return `${i.name[0]}_{${i.name.slice(1)}}`;
+                        else return `\\overline{${i.name[0]}_{${i.name.slice(1)}}}`;
+                    }).join('\\cdot ');
+                }).join('\\cdot ')}}`;
+
+                res.push($(`<p>\\[${mdnf}\\]</p>`));
+            }
+            else {
+                res.push($(`<p>\\[${mdnf}\\]</p>`));
+            }
+        } else {
+            res.push($(`<p>\\[${mdnf}\\]</p>`));
+        }
+
+        return res;
+    }
+
     /** 
      * @param {HTMLCanvasElement} canvas
      * */
@@ -1105,6 +1154,64 @@ class FunctionCircuit extends MinimizedFunction {
             width: ptx,
             height: pty
         };
+    }
+
+    getNorMinimalKNF() {
+        const res = [];
+
+        let mknf = `f(${Array.from(Array(this.varsNum).keys()).map(i => `x_${i+1}`).join(',')}) =`;
+        mknf += this.mknf.map(im => {
+            if(im.length > 1) return '(' + im.map(i => {
+                if(i.comp) return `\\overline{${i.name[0]}_{${i.name.slice(1)}}}`;
+                else return `${i.name[0]}_{${i.name.slice(1)}}`;
+            }).join('+ ') + ')';
+            else {
+                if(im[0].comp) return `\\overline{${im[0].name[0]}_{${im[0].name.slice(1)}}}`;
+                else return `${im[0].name[0]}_{${im[0].name.slice(1)}}`;
+            }
+        }).join('\\cdot ');
+
+        if(this.mknf.length != 1 || this.mknf[0].length != 1) {
+            mknf += ' = ';
+            res.push($(`<p>\\[${mknf}\\]</p>`));
+
+            mknf = ` = \\overline{\\overline{${this.mknf.map(im => {
+                if(im.length > 1) return '(' + im.map(i => {
+                    if(i.comp) return `\\overline{${i.name[0]}_{${i.name.slice(1)}}}`;
+                    else return `${i.name[0]}_{${i.name.slice(1)}}`;
+                }).join('+ ') + ')';
+                else {
+                    if(im[0].comp) return `\\overline{${im[0].name[0]}_{${im[0].name.slice(1)}}}`;
+                    else return `${im[0].name[0]}_{${im[0].name.slice(1)}}`;
+                }
+            }).join('\\cdot ')}}}`;
+
+            if(this.mknf.length > 1) {
+                mknf += ' = ';
+                res.push($(`<p>\\[${mknf}\\]</p>`));
+
+                mknf = ` = \\overline{${this.mknf.map(im => {
+                    if(im.length > 1) return `\\overline{${im.map(i => {
+                        if(i.comp) return `\\overline{${i.name[0]}_{${i.name.slice(1)}}}`;
+                        else return `${i.name[0]}_{${i.name.slice(1)}}`;
+                    }).join('+')}}`;
+                    else return im.map(i => {
+                        if(i.comp) return `${i.name[0]}_{${i.name.slice(1)}}`;
+                        else return `\\overline{${i.name[0]}_{${i.name.slice(1)}}}`;
+                    }).join('+');
+                }).join('+')}}`;
+
+                res.push($(`<p>\\[${mknf}\\]</p>`));
+            }
+            else {
+                res.push($(`<p>\\[${mknf}\\]</p>`));
+            }
+        }
+        else {
+            res.push($(`<p>\\[${mknf}\\]</p>`));
+        }
+
+        return res;
     }
 
     /** 
@@ -1309,6 +1416,123 @@ class FunctionCircuit extends MinimizedFunction {
         };
     }
 
+    getNandMinimalDNF2() {
+        const res = [];
+
+        let ndnf = [];
+
+        if(this.mdnf.length == 1 && this.mdnf[0].length == 1) {
+            ndnf = this.mdnf.slice();
+        }
+        else {
+            ndnf = this.mdnf.map(i => {
+                if(i.length > 1) return i;
+                return i.map(j => {
+                    return { name: j.name, comp: !j.comp };
+                }); 
+            });
+        }
+
+        const getNandRecs2 = (dnf) => {
+            if(dnf.length > 1) {
+                let mid = Math.floor(dnf.length / 2);
+                let pos1 = getNandRecs2(dnf.slice(0, mid)); 
+                let pos2 = getNandRecs2(dnf.slice(mid));
+
+                return `\\overline{\\overline{${pos1} \\cdot ${pos2}}}`;
+            } else {
+                if(dnf[0].comp) return `\\overline{${dnf[0].name[0]}_{${dnf[0].name.slice(1)}}}`;
+                else return `${dnf[0].name[0]}_{${dnf[0].name.slice(1)}}`;
+            }
+        };
+
+        const getNandRecs1 = (dnf) => {
+            if(dnf.length > 1) {
+                let mid = Math.floor(dnf.length / 2);
+                let pos1 = getNandRecs1(dnf.slice(0, mid)); 
+                let pos2 = getNandRecs1(dnf.slice(mid));
+
+                return `\\overline{\\overline{${pos1} \\cdot ${pos2}}}`;
+            } else {
+                let mid = Math.floor(dnf[0].length / 2);
+                if(dnf[0].length == 1) {
+                    if(dnf[0][0].comp) return `\\overline{${dnf[0][0].name[0]}_{${dnf[0][0].name.slice(1)}}}`;
+                    else return `${dnf[0][0].name[0]}_{${dnf[0][0].name.slice(1)}}`;
+                }
+
+                let pos1 = getNandRecs2(dnf[0].slice(0, mid)); 
+                let pos2 = getNandRecs2(dnf[0].slice(mid));
+
+                return `\\overline{${pos1} \\cdot ${pos2}}`;
+            }
+        };
+
+        let mdnf = `f(${Array.from(Array(this.varsNum).keys()).map(i => `x_${i+1}`).join(',')}) =`;
+        mdnf += this.mdnf.map(im => {
+            return im.map(i => {
+                if(i.comp) return `\\overline{${i.name[0]}_{${i.name.slice(1)}}}`;
+                else return `${i.name[0]}_{${i.name.slice(1)}}`;
+            }).join('\\cdot ');
+        }).join('+');
+
+        if(this.mdnf.length != 1 || this.mdnf[0].length != 1) {
+            mdnf += ' = ';
+            res.push($(`<p>\\[${mdnf}\\]</p>`));
+
+            mdnf = ` = \\overline{\\overline{${this.mdnf.map(im => {
+                return im.map(i => {
+                    if(i.comp) return `\\overline{${i.name[0]}_{${i.name.slice(1)}}}`;
+                    else return `${i.name[0]}_{${i.name.slice(1)}}`;
+                }).join('\\cdot ');
+            }).join('+')}}}`;
+            
+            if(this.mdnf.length > 1) {
+                mdnf += ' = ';
+                res.push($(`<p>\\[${mdnf}\\]</p>`));
+
+                mdnf = ` = \\overline{${this.mdnf.map(im => {
+                    if(im.length > 1) return `\\overline{${im.map(i => {
+                        if(i.comp) return `\\overline{${i.name[0]}_{${i.name.slice(1)}}}`;
+                        else return `${i.name[0]}_{${i.name.slice(1)}}`;
+                    }).join('\\cdot ')}}`;
+                    else return im.map(i => {
+                        if(i.comp) return `${i.name[0]}_{${i.name.slice(1)}}`;
+                        else return `\\overline{${i.name[0]}_{${i.name.slice(1)}}}`;
+                    }).join('\\cdot ');
+                }).join('\\cdot ')}}`;
+
+                if(this.mdnf.length > 2 || this.mdnf.some(im => im.length > 2)) {
+                    mdnf += ' = ';
+                    res.push($(`<p>\\[${mdnf}\\]</p>`));
+
+                    let mid = Math.floor(ndnf.length / 2);
+                    let pos1 = getNandRecs1(ndnf.slice(0, mid));
+                    let pos2 = getNandRecs1(ndnf.slice(mid));
+
+                    res.push($(`<p>\\[= \\overline{${pos1} \\cdot ${pos2}}\\]</p>`));
+                }
+                else {
+                    res.push($(`<p>\\[${mdnf}\\]</p>`));
+                }
+            }
+            else {
+                if(this.mdnf[0].length > 1) {
+                    mdnf += ' = ';
+                    res.push($(`<p>\\[${mdnf}\\]</p>`));
+
+                    res.push($(`<p>\\[ = ${getNandRecs2(ndnf[0])}\\]</p>`));
+                }
+                else {
+                    res.push($(`<p>\\[${mdnf}\\]</p>`));
+                }
+            }
+        } else {
+            res.push($(`<p>\\[${mdnf}\\]</p>`));
+        }
+
+        return res;
+    }
+
     /** 
      * @param {HTMLCanvasElement} canvas
      * */
@@ -1443,7 +1667,7 @@ class FunctionCircuit extends MinimizedFunction {
                     ctx.lineTo(ptx, pty);
                     ctx.stroke();
 
-                    let vname = (dnf[0][0].comp ? '':'!') + dnf[0][0].name;
+                    let vname = (dnf[0][0].comp ? '!':'') + dnf[0][0].name;
 
                     ctx.lineWidth = 1;
                     ctx.beginPath();
@@ -1591,6 +1815,132 @@ class FunctionCircuit extends MinimizedFunction {
         };
     }
 
+    getNorMinimalKNF2() {
+        const res = [];
+
+        let ndnf = [];
+
+        if(this.mknf.length == 1 && this.mknf[0].length == 1) {
+            ndnf = this.mknf.slice();
+        }
+        else {
+            ndnf = this.mknf.map(i => {
+                if(i.length > 1) return i;
+                return i.map(j => {
+                    return { name: j.name, comp: !j.comp };
+                }); 
+            });
+        }
+
+        const getNandRecs2 = (dnf) => {
+            if(dnf.length > 1) {
+                let mid = Math.floor(dnf.length / 2);
+                let pos1 = getNandRecs2(dnf.slice(0, mid)); 
+                let pos2 = getNandRecs2(dnf.slice(mid));
+
+                return `\\overline{\\overline{${pos1} + ${pos2}}}`;
+            } else {
+                if(dnf[0].comp) return `\\overline{${dnf[0].name[0]}_{${dnf[0].name.slice(1)}}}`;
+                else return `${dnf[0].name[0]}_{${dnf[0].name.slice(1)}}`;
+            }
+        };
+
+        const getNandRecs1 = (dnf) => {
+            if(dnf.length > 1) {
+                let mid = Math.floor(dnf.length / 2);
+                let pos1 = getNandRecs1(dnf.slice(0, mid)); 
+                let pos2 = getNandRecs1(dnf.slice(mid));
+
+                return `\\overline{\\overline{${pos1} + ${pos2}}}`;
+            } else {
+                let mid = Math.floor(dnf[0].length / 2);
+                if(dnf[0].length == 1) {
+                    if(dnf[0][0].comp) return `\\overline{${dnf[0][0].name[0]}_{${dnf[0][0].name.slice(1)}}}`;
+                    else return `${dnf[0][0].name[0]}_{${dnf[0][0].name.slice(1)}}`;
+                }
+
+                let pos1 = getNandRecs2(dnf[0].slice(0, mid)); 
+                let pos2 = getNandRecs2(dnf[0].slice(mid));
+
+                return `\\overline{${pos1} + ${pos2}}`;
+            }
+        };
+
+        let mknf = `f(${Array.from(Array(this.varsNum).keys()).map(i => `x_${i+1}`).join(',')}) =`;
+        mknf += this.mknf.map(im => {
+            if(im.length > 1) return '(' + im.map(i => {
+                if(i.comp) return `\\overline{${i.name[0]}_{${i.name.slice(1)}}}`;
+                else return `${i.name[0]}_{${i.name.slice(1)}}`;
+            }).join('+ ') + ')';
+            else {
+                if(im[0].comp) return `\\overline{${im[0].name[0]}_{${im[0].name.slice(1)}}}`;
+                else return `${im[0].name[0]}_{${im[0].name.slice(1)}}`;
+            }
+        }).join('\\cdot ');
+
+        if(this.mknf.length != 1 || this.mknf[0].length != 1) {
+            mknf += ' = ';
+            res.push($(`<p>\\[${mknf}\\]</p>`));
+
+            mknf = ` = \\overline{\\overline{${this.mknf.map(im => {
+                if(im.length > 1) return '(' + im.map(i => {
+                    if(i.comp) return `\\overline{${i.name[0]}_{${i.name.slice(1)}}}`;
+                    else return `${i.name[0]}_{${i.name.slice(1)}}`;
+                }).join('+ ') + ')';
+                else {
+                    if(im[0].comp) return `\\overline{${im[0].name[0]}_{${im[0].name.slice(1)}}}`;
+                    else return `${im[0].name[0]}_{${im[0].name.slice(1)}}`;
+                }
+            }).join('\\cdot ')}}}`;
+
+            if(this.mknf.length > 1) {
+                mknf += ' = ';
+                res.push($(`<p>\\[${mknf}\\]</p>`));
+
+                mknf = ` = \\overline{${this.mknf.map(im => {
+                    if(im.length > 1) return `\\overline{${im.map(i => {
+                        if(i.comp) return `\\overline{${i.name[0]}_{${i.name.slice(1)}}}`;
+                        else return `${i.name[0]}_{${i.name.slice(1)}}`;
+                    }).join('+')}}`;
+                    else return im.map(i => {
+                        if(i.comp) return `${i.name[0]}_{${i.name.slice(1)}}`;
+                        else return `\\overline{${i.name[0]}_{${i.name.slice(1)}}}`;
+                    }).join('+');
+                }).join('+')}}`;
+
+                if(this.mknf.length > 2 || this.mknf.some(im => im.length > 2)) {
+                    mknf += ' = ';
+                    res.push($(`<p>\\[${mknf}\\]</p>`));
+
+                    let mid = Math.floor(ndnf.length / 2);
+                    let pos1 = getNandRecs1(ndnf.slice(0, mid));
+                    let pos2 = getNandRecs1(ndnf.slice(mid));
+
+                    res.push($(`<p>\\[= \\overline{${pos1} + ${pos2}}\\]</p>`));
+                }
+                else {
+                    res.push($(`<p>\\[${mknf}\\]</p>`));
+                }
+            }
+            else {
+                if(this.mknf[0].length > 1) {
+                    mknf += ' = ';
+                    res.push($(`<p>\\[${mknf}\\]</p>`));
+
+                    res.push($(`<p>\\[ = ${getNandRecs2(ndnf[0])}\\]</p>`));
+                }
+                else {
+                    res.push($(`<p>\\[${mknf}\\]</p>`));
+                }
+            }
+        }
+        else {
+            res.push($(`<p>\\[${mknf}\\]</p>`));
+        }
+
+        return res;
+    }
+
     /** 
      * @param {HTMLCanvasElement} canvas
      * */
@@ -1725,7 +2075,7 @@ class FunctionCircuit extends MinimizedFunction {
                     ctx.lineTo(ptx, pty);
                     ctx.stroke();
 
-                    let vname = (dnf[0][0].comp ? '':'!') + dnf[0][0].name;
+                    let vname = (dnf[0][0].comp ? '!':'') + dnf[0][0].name;
 
                     ctx.lineWidth = 1;
                     ctx.beginPath();
@@ -1814,17 +2164,12 @@ class FunctionCircuit extends MinimizedFunction {
     getSizeNorDNF2() {
         let ndnf = [];
 
-        if(this.mdnf.length == 1 && this.mdnf[0].length == 1) {
-            ndnf = this.mdnf.slice();
-        }
-        else {
-            ndnf = this.mdnf.map(i => {
-                if(i.length > 1) return i;
-                return i.map(j => {
-                    return { name: j.name, comp: !j.comp };
-                }); 
-            });
-        }
+        ndnf = this.mdnf.map(i => {
+            if(i.length == 1) return i;
+            return i.map(j => {
+                return { name: j.name, comp: !j.comp };
+            }); 
+        });
 
         const getSizeRec2 = (dnf) => {
             if(dnf.length > 1) {
@@ -1870,6 +2215,114 @@ class FunctionCircuit extends MinimizedFunction {
         };
     }
 
+    getNorMinimalDNF2() {
+        const res = [];
+
+        let ndnf = [];
+
+        ndnf = this.mdnf.map(i => {
+            if(i.length == 1) return i;
+            return i.map(j => {
+                return { name: j.name, comp: !j.comp };
+            }); 
+        });
+
+        const getNandRecs2 = (dnf) => {
+            if(dnf.length > 1) {
+                let mid = Math.floor(dnf.length / 2);
+                let pos1 = getNandRecs2(dnf.slice(0, mid)); 
+                let pos2 = getNandRecs2(dnf.slice(mid));
+
+                return `\\overline{\\overline{${pos1} + ${pos2}}}`;
+            } else {
+                if(dnf[0].comp) return `\\overline{${dnf[0].name[0]}_{${dnf[0].name.slice(1)}}}`;
+                else return `${dnf[0].name[0]}_{${dnf[0].name.slice(1)}}`;
+            }
+        };
+
+        const getNandRecs1 = (dnf) => {
+            if(dnf.length > 1) {
+                let mid = Math.floor(dnf.length / 2);
+                let pos1 = getNandRecs1(dnf.slice(0, mid)); 
+                let pos2 = getNandRecs1(dnf.slice(mid));
+
+                return `\\overline{\\overline{${pos1} + ${pos2}}}`;
+            } else {
+                let mid = Math.floor(dnf[0].length / 2);
+                if(dnf[0].length == 1) {
+                    if(dnf[0][0].comp) return `\\overline{${dnf[0][0].name[0]}_{${dnf[0][0].name.slice(1)}}}`;
+                    else return `${dnf[0][0].name[0]}_{${dnf[0][0].name.slice(1)}}`;
+                }
+
+                let pos1 = getNandRecs2(dnf[0].slice(0, mid)); 
+                let pos2 = getNandRecs2(dnf[0].slice(mid));
+
+                return `\\overline{${pos1} + ${pos2}}`;
+            }
+        };
+
+        let mdnf = `f(${Array.from(Array(this.varsNum).keys()).map(i => `x_${i+1}`).join(',')}) =`;
+        mdnf += this.mdnf.map(im => {
+            return im.map(i => {
+                if(i.comp) return `\\overline{${i.name[0]}_{${i.name.slice(1)}}}`;
+                else return `${i.name[0]}_{${i.name.slice(1)}}`;
+            }).join('\\cdot ');
+        }).join('+');
+
+        if(this.mdnf.length != 1 || this.mdnf[0].length != 1) {
+            mdnf += ' = ';
+            res.push($(`<p>\\[${mdnf}\\]</p>`));
+
+            mdnf = ` = ${this.mdnf.map(im => {
+                return `\\overline{\\overline{${im.map(i => {
+                    if(i.comp) return `\\overline{${i.name[0]}_{${i.name.slice(1)}}}`;
+                    else return `${i.name[0]}_{${i.name.slice(1)}}`;
+                }).join('\\cdot ')}}}`;
+            }).join('+')}`;
+            
+            if(this.mdnf.length > 1) {
+                mdnf += ' = ';
+                res.push($(`<p>\\[${mdnf}\\]</p>`));
+
+                mdnf = ` = ${this.mdnf.map(im => {
+                    if(im.length > 1) return `\\overline{${im.map(i => {
+                        if(!i.comp) return `\\overline{${i.name[0]}_{${i.name.slice(1)}}}`;
+                        else return `${i.name[0]}_{${i.name.slice(1)}}`;
+                    }).join('+ ')}}`;
+                    else return im.map(i => {
+                        if(!i.comp) return `${i.name[0]}_{${i.name.slice(1)}}`;
+                        else return `\\overline{${i.name[0]}_{${i.name.slice(1)}}}`;
+                    }).join(' + ');
+                }).join(' + ')}`;
+
+                if(this.mdnf.length > 2 || this.mdnf.some(im => im.length > 2)) {
+                    mdnf += ' = ';
+                    res.push($(`<p>\\[${mdnf}\\]</p>`));
+
+                    res.push($(`<p>\\[= ${getNandRecs1(ndnf)}\\]</p>`));
+                }
+                else {
+                    res.push($(`<p>\\[${mdnf}\\]</p>`));
+                }
+            }
+            else {
+                if(this.mdnf[0].length > 1) {
+                    mdnf += ' = ';
+                    res.push($(`<p>\\[${mdnf}\\]</p>`));
+
+                    res.push($(`<p>\\[ = ${getNandRecs1(ndnf)}\\]</p>`));
+                }
+                else {
+                    res.push($(`<p>\\[${mdnf}\\]</p>`));
+                }
+            }
+        } else {
+            res.push($(`<p>\\[${mdnf}\\]</p>`));
+        }
+
+        return res;
+    }
+
     /** 
      * @param {HTMLCanvasElement} canvas
      * */
@@ -1879,17 +2332,12 @@ class FunctionCircuit extends MinimizedFunction {
 
         let ndnf = [];
 
-        if(this.mdnf.length == 1 && this.mdnf[0].length == 1) {
-            ndnf = this.mdnf.slice();
-        }
-        else {
-            ndnf = this.mdnf.map(i => {
-                if(i.length > 1) return i;
-                return i.map(j => {
-                    return { name: j.name, comp: !j.comp };
-                }); 
-            });
-        }
+        ndnf = this.mdnf.map(i => {
+            if(i.length == 1) return i;
+            return i.map(j => {
+                return { name: j.name, comp: !j.comp };
+            }); 
+        });
 
         // Wires
         let [newVars, ptx] = FunctionCircuit.renderWiresNotNormal(canvas, ctx, this.varsNum, ndnf, forRet, FunctionCircuit.drawNotNor);
@@ -2004,7 +2452,7 @@ class FunctionCircuit extends MinimizedFunction {
                     ctx.lineTo(ptx, pty);
                     ctx.stroke();
 
-                    let vname = (dnf[0][0].comp ? '':'!') + dnf[0][0].name;
+                    let vname = (dnf[0][0].comp ? '!':'') + dnf[0][0].name;
 
                     ctx.lineWidth = 1;
                     ctx.beginPath();
