@@ -5,41 +5,7 @@ const DIST = 200;
 
 class FSM {
     constructor() {
-        this.states = [
-            {
-                "name": "1/x",
-                "nodes": {
-                    "0": [
-                        "a"
-                    ],
-                    "1": [
-                        "b"
-                    ]
-                }
-            },
-            {
-                "name": "2/y",
-                "nodes": {
-                    "1": [
-                        "a"
-                    ],
-                    "2": [
-                        "b"
-                    ]
-                }
-            },
-            {
-                "name": "3/z",
-                "nodes": {
-                    "0": [
-                        "b"
-                    ],
-                    "2": [
-                        "a"
-                    ]
-                }
-            }
-        ];
+        this.states = [];
         this.actions = [];
 
         this.ox = 300;
@@ -432,7 +398,7 @@ class FSM {
                 <div class="diag-up">q(t)</div>
                 <div class="diag-bottom">a</div>
             </td>
-            ${this.Q.map((i) => `<td>${i}${this.isMur?`/${this.states.find(j => j.name.split('/')[0] == i).name.split('/')[1]}`:``}</td>`).join('')}
+            ${this.Q.map((i, ind) => `<td>${i}${this.isMur?`/${this.dirMur?this.states.find(j => j.name.split('/')[0] == i).name.split('/')[1]:this.outputTable[0][ind]}`:``}</td>`).join('')}
         </tr>
         ${this.changeTable.map((i, ind) => `
         <tr>
@@ -470,7 +436,7 @@ class FSM {
 
         mats.querySelectorAll('.col-sm')[0].innerHTML = `
         \\[N=
-        \\begin{bmatrix}${mat.map(i => i.map((j, jnd) => j ? (this.isMur ? j.map((_, knd) => _ + '/' + this.states.find(k => k.name.split('/')[0] == this.Q[jnd]).name.split('/')[1]) : j.join('+')) : '\\varnothing').join('&')).join('\\\\')}\\end{bmatrix}
+        \\begin{bmatrix}${mat.map(i => i.map((j, jnd) => j ? (this.dirMur ? j.map((_, knd) => _ + '/' + this.states.find(k => k.name.split('/')[0] == this.Q[jnd]).name.split('/')[1]) : j.join('+')) : '\\varnothing').join('&')).join('\\\\')}\\end{bmatrix}
         \\]
         <p class="text-center p-2"><i>Matrica prelaza/izlaza</i></p>
         `;
