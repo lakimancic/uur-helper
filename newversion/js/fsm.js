@@ -315,8 +315,9 @@ class FSM {
                     for(let j in q.nodes) {
                         q.nodes[j].forEach(k => {
                             if(k.includes(a)) {
-                                tempTab.push(this.states.find(k => k.name.split('/')[0] == this.Q[j]).name.split('/')[1]);
-                                tempTab2.push(j);
+                                let qjnd = this.Q.findIndex(l => l == this.states[j].name.split('/')[0]);
+                                tempTab.push(this.states.find(k => k.name.split('/')[0] == this.Q[qjnd]).name.split('/')[1]);
+                                tempTab2.push(qjnd);
                             }
                         });
                     }
@@ -331,8 +332,9 @@ class FSM {
                     for(let j in q.nodes) {
                         q.nodes[j].forEach(k => {
                             if(k.includes(a)) {
+                                let qjnd = this.Q.findIndex(l => l == this.states[j].name.split('/')[0]);
                                 tempTab.push(k.split('/')[1]);
-                                tempTab2.push(j);
+                                tempTab2.push(qjnd);
                             }
                         });
                     }
