@@ -325,7 +325,7 @@ $("#analyze4").click(() => {
 
     let f0 = $("#f_0").val() || '';
     let f1 = $("#f_1").val() || '';
-    let fS = $("#f_*").val() || '';
+    let fS = $("#f_s").val() || '';
 
     if(!/^(\s*\d+\s*(,\s*\d+\s*)*)?$/.test(f0) || !/^(\s*\d+\s*(,\s*\d+\s*)*)?$/.test(f1) || !/^(\s*\d+\s*(,\s*\d+\s*)*)?$/.test(fS)) {
         Swal.fire({
