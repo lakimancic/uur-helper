@@ -2302,7 +2302,7 @@ class FunctionCircuit extends MinimizedFunction {
                     res.push($(`<p>\\[= ${getNandRecs1(ndnf)}\\]</p>`));
                 }
                 else {
-                    res.push($(`<p>\\[${mdnf}\\]</p>`));
+                    res.push($(`<p>\\[ = \\overline{\\overline{${mdnf.substring(2)}}}\\]</p>`));
                 }
             }
             else {
